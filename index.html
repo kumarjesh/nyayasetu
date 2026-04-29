@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NyayaSetu - Clean Community App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3; --secondary: #0ea5e9;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-600: #4b5563; --gray-800: #1f2937;
+            --radius: 16px; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --touch-target: 48px; /* ✅ Low-literacy: Larger touch targets */
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--gray-100); color: var(--gray-800); line-height: 1.6; overflow-x: hidden; font-size: 1.05rem; }
+        
+        /* ✅ LOW-LITERACY: High contrast mode toggle */
+        body.high-contrast { 
+            background: #000; color: #fff; 
+            --gray-100: #111; --gray-200: #333; --gray-300: #555; --gray-600: #ccc; --gray-800: #fff;
+        }
+        body.high-contrast .card, body.high-contrast .auth-card, body.high-contrast .app-header {
+            background: #1a1a1a; border: 2px solid #555;
+        }
+       
+        .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%); }
+        .auth-card { background: white; border-radius: 24px; padding: 24px; width: 100%; max-width: 480px; box-shadow: var(--shadow-lg); animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+       
+        .auth-header { text-align: center; margin-bottom: 20px; }
+        .auth-header i { font-size: 3.5rem; color: var(--primary); margin-bottom: 12px; }
+        .auth-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--gray-800); }
+        .auth-header p { color: var(--gray-600); font-size: 1rem; margin-top: 8px; }
+       
+        .auth-tabs { display: flex; background: var(--gray-100); border-radius: 16px; padding: 6px; margin-bottom: 20px; }
+        .auth-tab { flex: 1; padding: 14px; text-align: center; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 1rem; color: var(--gray-600); transition: all 0.3s; }
+        .auth-tab.active { background: white; color: var(--primary); box-shadow: var(--shadow); }
+       
+        .form-group { margin-bottom: 18px; position: relative; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 1rem; color: var(--gray-600); }
+        .form-group .input-wrapper { position: relative; }
+        .form-group i.input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gray-300); font-size: 1.2rem; }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; padding: 16px 16px 16px 48px; border: 2px solid var(--gray-200); border-radius: 16px; 
+            font-size: 1.1rem; transition: all 0.2s; background: var(--gray-50); min-height: var(--touch-target);
+        }
+        .form-group textarea { padding-left: 16px; resize: none; min-height: 120px; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); 
+        }
+        .form-group .toggle-pass { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--gray-300); padding: 8px; font-size: 1.2rem; min-width: var(--touch-target); min-height: var(--touch-target); display: flex; align-items: center; justify-content: center; }
+        .form-group .toggle-pass:hover { color: var(--gray-600); }
+        .error-msg { color: var(--danger); font-size: 0.9rem; margin-top: 6px; display: none; font-weight: 600; }
+        .form-group.error input { border-color: var(--danger); background: #fef2f2; }
+        .form-group.error .error-msg { display: block; }
+       
+        .btn { 
+            width: 100%; padding: 18px; border: none; border-radius: 16px; font-weight: 800; font-size: 1.15rem; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; 
+            transition: all 0.2s; position: relative; overflow: hidden; min-height: var(--touch-target);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 2px solid var(--gray-200); color: var(--gray-600); }
+        .btn-outline:hover { background: var(--gray-50); border-color: var(--gray-300); }
+        .btn-google { background: white; border: 2px solid var(--gray-200); color: var(--gray-800); }
+        .btn-phone { background: #dcfce7; border: 2px solid #bbf7d0; color: #166534; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-info { background: var(--secondary); color: white; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-large { padding: 20px; font-size: 1.25rem; }
+        .btn-demo { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; border: 2px dashed #a78bfa; }
+        .btn-icon-only { width: var(--touch-target); height: var(--touch-target); padding: 0; border-radius: 50%; }
+       
+        .divider { display: flex; align-items: center; margin: 24px 0; color: var(--gray-300); font-size: 0.95rem; font-weight: 600; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 2px; background: var(--gray-200); }
+        .divider span { padding: 0 18px; }
+       
+        .auth-footer { text-align: center; margin-top: 24px; font-size: 1rem; color: var(--gray-600); }
+        .auth-footer a { color: var(--primary); font-weight: 800; cursor: pointer; text-decoration: none; }
+       
+        .app-container { display: none; max-width: 640px; margin: 0 auto; min-height: 100vh; background: var(--gray-100); position: relative; padding-bottom: 90px; }
+        .app-header { background: white; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .app-header h1 { font-size: 1.3rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .user-pill { display: flex; align-items: center; gap: 10px; background: var(--gray-50); padding: 8px 14px; border-radius: 28px; font-size: 0.95rem; cursor: pointer; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
+       
+        .screen { display: none; padding: 16px; padding-bottom: 110px; animation: fadeIn 0.3s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+       
+        .card { background: white; border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+        .card-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; color: var(--gray-800); }
+       
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+       
+        .stat-box { background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%); color: white; padding: 20px; border-radius: var(--radius); text-align: center; }
+        .stat-num { font-size: 2.2rem; font-weight: 900; }
+        .stat-label { font-size: 0.9rem; opacity: 0.95; margin-top: 6px; font-weight: 600; }
+       
+        .status-badge { padding: 6px 14px; border-radius: 24px; font-size: 0.85rem; font-weight: 800; display: inline-block; }
+        .status-submitted { background: var(--gray-200); color: var(--gray-700); }
+        .status-progress { background: #fef3c7; color: #92400e; }
+        .status-resolved { background: #d1fae5; color: #065f46; }
+        .status-ngo-pending { background: #dbeafe; color: #1e40af; }
+        .status-ngo-verified { background: #d1fae5; color: #065f46; border: 2px solid #10b981; }
+        .status-ngo-rejected { background: #fee2e2; color: #991b1b; text-decoration: line-through; }
+        .status-escalated { background: #fef3c7; color: #92400e; border: 2px dashed #f59e0b; }
+       
+        .hash-box { background: var(--gray-50); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.75rem; word-break: break-all; color: var(--gray-600); border: 1px dashed var(--gray-300); margin-top: 10px; }
+       
+        .timeline { border-left: 4px solid var(--primary); padding-left: 18px; margin: 14px 0; }
+        .timeline-item { margin-bottom: 16px; position: relative; }
+        .timeline-item::before { content: ''; position: absolute; left: -24px; top: 8px; width: 14px; height: 14px; background: var(--primary); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px var(--primary); }
+        .t-date { font-size: 0.85rem; color: var(--gray-600); font-weight: 600; }
+        .t-text { font-weight: 700; font-size: 1rem; margin-top: 4px; }
+       
+        .vote-btn { flex: 1; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.05rem; min-height: var(--touch-target); }
+        .vote-yes { background: var(--success); }
+        .vote-no { background: var(--danger); }
+       
+        .progress-bar { height: 10px; background: var(--gray-200); border-radius: 6px; overflow: hidden; margin: 12px 0; }
+        .progress-fill { height: 100%; background: var(--success); transition: width 0.4s ease; border-radius: 6px; }
+       
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--gray-200); display: none; justify-content: space-around; padding: 8px 0 18px; z-index: 100; max-width: 640px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); }
+        .bottom-nav.active { display: flex; }
+        .nav-item { flex: 1; text-align: center; cursor: pointer; color: var(--gray-600); transition: all 0.2s; padding: 10px 4px; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+        .nav-item span { font-size: 0.8rem; font-weight: 700; }
+       
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--gray-800); color: white; padding: 16px 28px; border-radius: 14px; z-index: 9999; font-size: 1rem; font-weight: 700; opacity: 0; transition: all 0.3s; pointer-events: none; max-width: 92%; text-align: center; box-shadow: var(--shadow-lg); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); color: #1f2937; }
+       
+        .loading-spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+        .btn.loading .loading-spinner { display: block; }
+        .btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+       
+        .hidden-input { display: none; }
+        .img-preview { max-width: 100%; border-radius: 14px; margin-top: 14px; display: none; border: 3px solid var(--gray-200); position: relative; }
+        .img-preview.show { display: block; }
+        .retake-btn { position: absolute; top: 12px; right: 12px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; box-shadow: 0 3px 8px rgba(0,0,0,0.25); }
+       
+        .call-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: var(--radius); margin-bottom: 18px; display: flex; align-items: center; gap: 16px; cursor: pointer; }
+        .call-banner i { font-size: 2rem; }
+        .call-banner div { flex: 1; }
+        .call-banner h3 { font-size: 1.2rem; margin-bottom: 4px; font-weight: 800; }
+        .call-banner p { font-size: 0.95rem; opacity: 0.95; }
+       
+        .toggle-checkbox { position: relative; width: 52px; height: 30px; display: inline-block; }
+        .toggle-checkbox input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--gray-300); transition: .3s; border-radius: 30px; }
+        .toggle-slider::before { position: absolute; content: ""; height: 24px; width: 24px; left: 3px; bottom: 3px; background: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+        .toggle-checkbox input:checked + .toggle-slider { background: var(--success); }
+        .toggle-checkbox input:checked + .toggle-slider::before { transform: translateX(22px); }
+       
+        .lang-selector { display: flex; align-items: center; gap: 12px; background: var(--gray-50); padding: 14px; border-radius: 14px; margin-bottom: 16px; }
+        .lang-selector i { color: var(--primary); font-size: 1.3rem; }
+        .lang-selector select { flex: 1; border: none; background: transparent; font-weight: 700; color: var(--gray-800); font-size: 1.05rem; padding: 10px 0; }
+        .lang-badge { background: var(--primary); color: white; padding: 4px 12px; border-radius: 16px; font-size: 0.8rem; font-weight: 800; }
+       
+        .voice-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 22px; font-size: 1.2rem; border-radius: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .voice-btn.recording { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); animation: pulse 0.8s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+       
+        .camera-btn { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 22px; font-size: 1.2rem; border-radius: 16px; margin-bottom: 16px; border: none; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.12); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .camera-btn:active { transform: scale(0.98); }
+       
+        .help-text { background: #fef3c7; border: 2px solid #fcd34d; color: #92400e; padding: 16px; border-radius: 12px; font-size: 1rem; margin-bottom: 16px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .help-text i { font-size: 1.2rem; }
+       
+        .status-box { background: #eff6ff; border-left: 5px solid var(--primary); padding: 16px; border-radius: 10px; margin: 14px 0; font-size: 1rem; }
+        .status-box.error-box { background: #fef2f2; border-left-color: var(--danger); color: #991b1b; }
+        .status-box.success-box { background: #ecfdf5; border-left-color: var(--success); color: #065f46; }
+       
+        .profile-header { background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%); color: white; padding: 32px 20px 56px; border-radius: 0 0 32px 32px; text-align: center; margin-bottom: -44px; position: relative; }
+        .profile-avatar { width: 96px; height: 96px; border-radius: 50%; background: rgba(255,255,255,0.25); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; border: 4px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+       
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--gray-600); }
+        .empty-state i { font-size: 3.5rem; margin-bottom: 18px; color: var(--gray-300); }
+        .empty-state p { font-size: 1.1rem; font-weight: 600; }
+       
+        .complaint-item { border: 2px solid var(--gray-200); border-radius: 14px; padding: 18px; margin-bottom: 14px; background: white; transition: all 0.2s; }
+        .complaint-item:active { background: var(--gray-50); border-color: var(--primary); }
+        .complaint-item .category-icon { font-size: 2rem; margin-right: 10px; }
+
+        #cameraModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #cameraModal video { width: 100%; max-width: 600px; max-height: 70vh; border-radius: 14px; object-fit: cover; background: #000; }
+        #cameraModal canvas { display: none; }
+        #cameraModal .modal-actions { margin-top: 24px; display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+        #cameraModal .modal-actions .btn { min-width: 150px; padding: 18px 28px; }
+        #cameraModal .close-btn { position: absolute; top: 24px; right: 24px; color: white; font-size: 2.2rem; cursor: pointer; z-index: 10001; background: rgba(0,0,0,0.6); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #cameraModal .close-btn:hover { background: rgba(0,0,0,0.8); }
+        #cameraStatus { margin-top: 14px; }
+
+        /* ✅ LOW-LITERACY: Visual Category Selector */
+        .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+        .category-card { 
+            background: var(--gray-50); border: 2px solid var(--gray-200); border-radius: 14px; 
+            padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; 
+            display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 100px;
+        }
+        .category-card:hover, .category-card.selected { 
+            border-color: var(--primary); background: #eef2ff; transform: translateY(-2px); 
+            box-shadow: var(--shadow);
+        }
+        .category-card i { font-size: 2.2rem; color: var(--primary); }
+        .category-card span { font-weight: 700; font-size: 0.95rem; }
+        
+        /* ✅ LOW-LITERACY: Progress Wizard */
+        .wizard-steps { display: flex; justify-content: space-between; margin: 20px 0; position: relative; }
+        .wizard-steps::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 3px; background: var(--gray-200); z-index: 1; }
+        .wizard-step { 
+            position: relative; z-index: 2; width: 40px; height: 40px; border-radius: 50%; 
+            background: var(--gray-200); color: var(--gray-600); display: flex; align-items: center; 
+            justify-content: center; font-weight: 800; font-size: 1.1rem; border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .wizard-step.active { background: var(--primary); color: white; }
+        .wizard-step.completed { background: var(--success); color: white; }
+        .wizard-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem; color: var(--gray-600); }
+        
+        /* ✅ LOW-LITERACY: Picture-based Status */
+        .status-visual { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--gray-50); border-radius: 12px; margin: 12px 0; }
+        .status-visual .status-icon { 
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; font-size: 1.5rem; color: white; flex-shrink: 0;
+        }
+        .status-visual.submitted .status-icon { background: var(--gray-400); }
+        .status-visual.progress .status-icon { background: var(--warning); }
+        .status-visual.resolved .status-icon { background: var(--success); }
+        .status-visual.escalated .status-icon { background: var(--danger); animation: pulse 1s infinite; }
+        .status-visual .status-text { font-weight: 700; font-size: 1.05rem; }
+        .status-visual .status-subtext { font-size: 0.9rem; color: var(--gray-600); margin-top: 4px; }
+        
+        /* ✅ LOW-LITERACY: Voice Instruction Banner */
+        .voice-instruction { 
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; 
+            padding: 16px; border-radius: 14px; margin: 16px 0; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; box-shadow: var(--shadow);
+        }
+        .voice-instruction i { font-size: 1.8rem; }
+        .voice-instruction .text { flex: 1; }
+        .voice-instruction .text h4 { font-size: 1.1rem; margin-bottom: 4px; }
+        .voice-instruction .text p { font-size: 0.95rem; opacity: 0.95; }
+        
+        /* ✅ LOW-LITERACY: Large Emergency Button */
+        .emergency-banner { 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; 
+            padding: 20px; border-radius: 16px; margin: 16px 0; display: flex; align-items: center; gap: 16px;
+            cursor: pointer; box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); animation: pulse 2s infinite;
+        }
+        .emergency-banner i { font-size: 2rem; }
+        .emergency-banner .text { flex: 1; }
+        .emergency-banner .text h3 { font-size: 1.3rem; margin-bottom: 4px; font-weight: 800; }
+        .emergency-banner .text p { font-size: 1rem; opacity: 0.95; }
+        
+        /* ✅ LOW-LITERACY: Accessibility Toolbar */
+        .accessibility-bar { 
+            position: fixed; bottom: 80px; right: 20px; background: white; border-radius: 50px; 
+            padding: 8px; box-shadow: var(--shadow-lg); display: flex; gap: 8px; z-index: 99;
+            border: 2px solid var(--gray-200);
+        }
+        .access-btn { 
+            width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--gray-100); 
+            color: var(--gray-700); display: flex; align-items: center; justify-content: center; 
+            font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
+        }
+        .access-btn:hover, .access-btn.active { background: var(--primary); color: white; }
+        
+        /* ✅ LOW-LITERACY: Simplified Mode Toggle */
+        body.simplified .card-title, body.simplified .form-group label, body.simplified .btn {
+            font-size: 1.3rem;
+        }
+        body.simplified .nav-item span { display: none; }
+        body.simplified .nav-item i { font-size: 2rem; margin-bottom: 2px; }
+        body.simplified .category-card span { font-size: 1.1rem; }
+        body.simplified .help-text, body.simplified .status-box { font-size: 1.15rem; }
+        
+        @media (max-width: 400px) {
+            .auth-card { padding: 20px 16px; }
+            .btn { padding: 16px; font-size: 1.1rem; }
+            .stat-num { font-size: 1.8rem; }
+            #cameraModal .modal-actions .btn { min-width: 130px; padding: 14px 20px; font-size: 1rem; }
+            .category-grid { grid-template-columns: 1fr; }
+            .accessibility-bar { bottom: 90px; right: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast"></div>
+    
+    <!-- ✅ LOW-LITERACY: Accessibility Toolbar -->
+    <div class="accessibility-bar">
+        <button class="access-btn" onclick="toggleHighContrast()" title="High Contrast" id="contrastBtn">
+            <i class="fas fa-adjust"></i>
+        </button>
+        <button class="access-btn" onclick="toggleSimplifiedMode()" title="Simplified View" id="simpleBtn">
+            <i class="fas fa-text-height"></i>
+        </button>
+        <button class="access-btn" onclick="speakCurrentScreen()" title="Hear Instructions">
+            <i class="fas fa-volume-up"></i>
+        </button>
+        <button class="access-btn" onclick="nav('call-report')" title="Emergency Call">
+            <i class="fas fa-phone-volume" style="color: var(--danger);"></i>
+        </button>
+    </div>
+
+    <div id="authWrapper" class="auth-wrapper">
+        <div id="loginScreen" class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-bridge"></i>
+                <h1 data-i18n="welcomeTitle">Welcome to NyayaSetu</h1>
+                <p data-i18n="welcomeSubtitle">Clean Community, Together</p>
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('email', event)" data-i18n="emailTab">Email / Google</div>
+                <div class="auth-tab" onclick="switchAuthTab('phone', event)" data-i18n="phoneTab">Phone Number</div>
+            </div>
+            <div id="emailForm">
+                <div class="form-group" id="emailGroup">
+                    <label data-i18n="emailLabel">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="loginEmail" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder">
+                    </div>
+                    <div class="error-msg" data-i18n="emailError">Please enter a valid email</div>
+                </div>
+                <div class="form-group" id="passGroup">
+                    <label data-i18n="passwordLabel">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" data-i18n-placeholder="passPlaceholder">
+                        <i class="fas fa-eye toggle-pass" onclick="togglePass('loginPassword', this)" aria-label="Toggle password visibility"></i>
+                    </div>
+                    <div class="error-msg" data-i18n="passError">Password must be at least 6 characters</div>
+                </div>
+                <button class="btn btn-primary btn-large" id="loginBtn" onclick="handleLogin()">
+                    <span class="btn-text" data-i18n="loginBtn">Login Securely</span>
+                    <div class="loading-spinner"></div>
+                </button>
+                <button class="btn btn-demo btn-large" style="margin-top: 12px;" onclick="demoLogin()">
+                    <i class="fas fa-user-astronaut"></i> <span class="btn-text" data-i18n="demoBtn">Try Demo Login</span>
+                </button>
+                <div class="divider"><span data-i18n="orText">OR</span></div>
+                <button class="btn btn-google" onclick="handleGoogleLogin()">
+                    <i class="fab fa-google" style="color: #DB4437; font-size: 1.3rem;"></i> <span data-i18n="googleBtn">Continue with Google</span>
+                </button>
+            </div>
+            <div id="phoneForm" style="display: none;">
+                <!-- ✅ LOW-LITERACY: Simplified phone login with large number pad hint -->
+                <div class="help-text">
+                    <i class="fas fa-keypad"></i> <span data-i18n="phoneHint">Enter your 10-digit mobile number</span>
+                </div>
+                <div class="form-group" id="phoneGroup">
+                    <label data-i18n="phoneLabel">Mobile Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel" id="loginPhone" placeholder="+91 98765 43210" data-i18n-placeholder="phonePlaceholder" inputmode="numeric">
+                    </div>
+                    <div class="error-msg" data-i18n="phoneError">Please enter a valid 10-digit number</div>
+                </div>
+                <div class="form-group" id="otpGroup" style="display: none;">
+                    <label data-i18n="otpLabel">OTP Verification</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-shield-alt input-icon"></i>
+                        <input type="text" id="loginOtp" placeholder="Enter 6-digit OTP" maxlength="6" data-i18n-placeholder="otpPlaceholder" inputmode="numeric">
+                    </div>
+                    <div class="error-msg" data-i18n="otpError">Invalid OTP</div>
+                </div>
+                <button class="btn btn-phone btn-large" id="phoneBtn" onclick="handlePhoneLogin()">
+                    <span class="btn-text" id="phoneBtnText" data-i18n="sendOtpBtn">Send OTP</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </div>
+            <div class="auth-footer" data-i18n="noAccount">Don't have an account? <a onclick="showScreen('registerScreen')">Register Now</a></div>
+        </div>
+
+        <div id="registerScreen" class="auth-card" style="display: none;">
+            <div class="auth-header">
+                <i class="fas fa-user-plus"></i>
+                <h1 data-i18n="registerTitle">Create Account</h1>
+                <p data-i18n="registerSubtitle">Join the clean community initiative</p>
+            </div>
+            <div class="form-group"><label data-i18n="nameLabel">Full Name</label><div class="input-wrapper"><i class="fas fa-user input-icon"></i><input type="text" id="regName" placeholder="Enter full name" data-i18n-placeholder="namePlaceholder"></div></div>
+            <div class="form-group"><label data-i18n="emailLabel">Email</label><div class="input-wrapper"><i class="fas fa-envelope input-icon"></i><input type="email" id="regEmail" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder"></div></div>
+            <div class="form-group"><label data-i18n="phoneLabel">Phone</label><div class="input-wrapper"><i class="fas fa-phone input-icon"></i><input type="tel" id="regPhone" placeholder="+91 98765 43210" data-i18n-placeholder="phonePlaceholder"></div></div>
+            <div class="form-group"><label data-i18n="roleLabel">Role</label><div class="input-wrapper"><i class="fas fa-user-tag input-icon"></i><select id="regRole"><option value="citizen" data-i18n="roleCitizen">Citizen</option><option value="validator" data-i18n="roleValidator">Community Validator</option><option value="admin" data-i18n="roleAdmin">Govt Official</option><option value="ngo" data-i18n="roleNGO">NGO Partner</option></select></div></div>
+            <div class="form-group"><label data-i18n="passwordLabel">Password</label><div class="input-wrapper"><i class="fas fa-lock input-icon"></i><input type="password" id="regPass" placeholder="Min 6 characters" data-i18n-placeholder="passPlaceholder"><i class="fas fa-eye toggle-pass" onclick="togglePass('regPass', this)"></i></div></div>
+            <div class="form-group"><label data-i18n="confirmPasswordLabel">Confirm Password</label><div class="input-wrapper"><i class="fas fa-lock input-icon"></i><input type="password" id="regConfirm" placeholder="Re-enter password" data-i18n-placeholder="confirmPlaceholder"><i class="fas fa-eye toggle-pass" onclick="togglePass('regConfirm', this)"></i></div><div class="error-msg" id="regMatchError" data-i18n="passMatchError">Passwords do not match</div></div>
+            <button class="btn btn-primary btn-large" onclick="handleRegister()"><span class="btn-text" data-i18n="registerBtn">Create Account</span><div class="loading-spinner"></div></button>
+            <div class="auth-footer" data-i18n="hasAccount">Already have an account? <a onclick="showScreen('loginScreen')">Login</a></div>
+        </div>
+    </div>
+
+    <div id="appContainer" class="app-container">
+        <div class="app-header">
+            <h1><i class="fas fa-bridge"></i> <span data-i18n="appName">NyayaSetu</span></h1>
+            <div class="user-pill" onclick="nav('profile')">
+                <div class="user-avatar" id="headerAvatar">U</div>
+                <div>
+                    <div style="font-weight: 800; font-size: 0.95rem;" id="headerName">User</div>
+                    <div style="font-size: 0.8rem; color: var(--gray-600);" id="headerRole">Citizen</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="home" class="screen active">
+            <!-- ✅ LOW-LITERACY: Emergency Quick Access -->
+            <div class="emergency-banner" onclick="nav('call-report')">
+                <i class="fas fa-phone-volume"></i>
+                <div class="text">
+                    <h3 data-i18n="emergencyTitle">🚨 Urgent Issue?</h3>
+                    <p data-i18n="emergencyDesc">Tap to call & report immediately</p>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            
+            <div class="call-banner" onclick="nav('call-report')">
+                <i class="fas fa-phone-alt"></i>
+                <div><h3 data-i18n="callReportTitle">Report via Call</h3><p data-i18n="callReportDesc">Tap to call authority & log complaint</p></div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            
+            <div class="card">
+                <div class="card-title"><i class="fas fa-home"></i> <span data-i18n="quickActions">Quick Actions</span></div>
+                <!-- ✅ LOW-LITERACY: Icon + Text Large Buttons -->
+                <div class="grid-2">
+                    <button class="btn btn-success" onclick="nav('report')">
+                        <i class="fas fa-camera" style="font-size:1.4rem;"></i> 
+                        <span data-i18n="reportIssue">Report Issue</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="nav('track')">
+                        <i class="fas fa-search" style="font-size:1.4rem;"></i> 
+                        <span data-i18n="trackStatus">Track Status</span>
+                    </button>
+                    <button class="btn btn-warning" onclick="nav('validate')">
+                        <i class="fas fa-users" style="font-size:1.4rem;"></i> 
+                        <span data-i18n="validate">Validate</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="nav('my-complaints')">
+                        <i class="fas fa-list" style="font-size:1.4rem;"></i> 
+                        <span data-i18n="myReports">My Reports</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-pie"></i> <span data-i18n="communityStats">Community Stats</span></div>
+                <div class="grid-3">
+                    <div style="text-align:center;"><div class="stat-num" style="color:var(--primary);" id="homeTotal">0</div><div class="stat-label" data-i18n="total">Total</div></div>
+                    <div style="text-align:center;"><div class="stat-num" style="color:var(--warning);" id="homePending">0</div><div class="stat-label" data-i18n="pending">Pending</div></div>
+                    <div style="text-align:center;"><div class="stat-num" style="color:var(--success);" id="homeResolved">0</div><div class="stat-label" data-i18n="resolved">Resolved</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="report" class="screen">
+            <!-- ✅ LOW-LITERACY: Step Wizard -->
+            <div class="wizard-steps">
+                <div class="wizard-step active" id="step1">1</div>
+                <div class="wizard-step" id="step2">2</div>
+                <div class="wizard-step" id="step3">3</div>
+            </div>
+            <div class="wizard-labels">
+                <span data-i18n="step1">Select</span>
+                <span data-i18n="step2">Describe</span>
+                <span data-i18n="step3">Submit</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title"><i class="fas fa-bullhorn"></i> <span data-i18n="newComplaint">New Complaint</span></div>
+                
+                <!-- ✅ LOW-LITERACY: Voice Instruction Banner -->
+                <div class="voice-instruction" onclick="speakInstructions('report')">
+                    <i class="fas fa-volume-up"></i>
+                    <div class="text">
+                        <h4 data-i18n="needHelp">Need Help?</h4>
+                        <p data-i18n="tapToHear">Tap to hear instructions in your language</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <div class="help-text"><i class="fas fa-language"></i> <span data-i18n="voiceHelp">Voice input available in 12+ Indian languages</span></div>
+                
+                <!-- ✅ LOW-LITERACY: Visual Category Selector (replaces dropdown) -->
+                <label style="display:block; margin-bottom:10px; font-weight:700; font-size:1.05rem;" data-i18n="categoryLabel">What is the problem?</label>
+                <div class="category-grid">
+                    <div class="category-card" onclick="selectCategory('garbage', this)">
+                        <i class="fas fa-trash-alt"></i>
+                        <span data-i18n="catGarbage">Garbage</span>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('drainage', this)">
+                        <i class="fas fa-tint"></i>
+                        <span data-i18n="catDrainage">Drainage</span>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('toilet', this)">
+                        <i class="fas fa-restroom"></i>
+                        <span data-i18n="catToilet">Toilet</span>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('water', this)">
+                        <i class="fas fa-water"></i>
+                        <span data-i18n="catWater">Water</span>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('road', this)">
+                        <i class="fas fa-road"></i>
+                        <span data-i18n="catRoad">Road</span>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('other', this)">
+                        <i class="fas fa-ellipsis-h"></i>
+                        <span data-i18n="catOther">Other</span>
+                    </div>
+                </div>
+                <input type="hidden" id="issueCat">
+                
+                <div class="lang-selector">
+                    <i class="fas fa-globe-asia"></i>
+                    <select id="voiceLang" onchange="changeVoiceLanguage()">
+                        <option value="en-IN">🇬🇧 English</option>
+                        <option value="hi-IN">🇮🇳 हिंदी</option>
+                        <option value="ta-IN">🇮🇳 தமிழ்</option>
+                        <option value="te-IN">🇮🇳 తెలుగు</option>
+                        <option value="bn-IN">🇮🇳 বাংলা</option>
+                        <option value="mr-IN">🇮🇳 मराठी</option>
+                        <option value="gu-IN">🇮🇳 ગુજરાતી</option>
+                        <option value="kn-IN">🇮🇳 ಕನ್ನಡ</option>
+                        <option value="ml-IN">🇮🇳 മലയാളം</option>
+                        <option value="pa-IN">🇮🇳 ਪੰਜਾਬੀ</option>
+                        <option value="or-IN">🇮🇳 ଓଡ଼ିଆ</option>
+                        <option value="as-IN">🇮🇳 অসমীয়া</option>
+                    </select>
+                    <span class="lang-badge" id="langDetected">Auto</span>
+                </div>
+                
+                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:1.05rem;" data-i18n="describeLabel">Describe the Problem:</label>
+                <button id="micBtn" class="btn voice-btn" onclick="toggleVoice()">
+                    <i class="fas fa-microphone"></i> <span id="micText" data-i18n="tapToSpeak">Tap to Speak</span>
+                </button>
+                <textarea id="descInput" rows="4" placeholder="Or type description here..." data-i18n-placeholder="typePlaceholder"></textarea>
+                <div id="voiceStatus" class="status-box" style="display: none;"><i class="fas fa-volume-up"></i> <span id="voiceMsg" data-i18n="listening">Listening...</span></div>
+                
+                <label style="display: block; margin: 18px 0 10px; font-weight: 700; font-size: 1.05rem;"><i class="fas fa-camera"></i> <span data-i18n="addPhoto">Add Photo Evidence:</span></label>
+                <div id="cameraModal">
+                    <div class="close-btn" onclick="closeCamera()"><i class="fas fa-times"></i></div>
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <canvas id="cameraCanvas"></canvas>
+                    <div class="modal-actions">
+                        <button class="btn btn-success" onclick="capturePhoto()"><i class="fas fa-camera"></i> <span data-i18n="capture">Capture</span></button>
+                        <button class="btn btn-danger" onclick="closeCamera()"><i class="fas fa-times"></i> <span data-i18n="cancel">Cancel</span></button>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-bottom: 16px;">
+                    <button class="btn camera-btn" onclick="openCameraModal()"><i class="fas fa-camera"></i> <span data-i18n="takePhoto">Take Photo</span></button>
+                    <button class="btn btn-info" onclick="document.getElementById('photoInput').click()"><i class="fas fa-upload"></i> <span data-i18n="uploadPhoto">Upload Photo</span></button>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden-input" onchange="previewImg(this)">
+                <div style="position: relative;">
+                    <img id="imgPreview" class="img-preview">
+                    <button class="retake-btn" id="retakeBtn" onclick="retakePhoto()" style="display: none;"><i class="fas fa-redo"></i></button>
+                </div>
+                <div id="cameraStatus" class="status-box" style="display: none;"><i class="fas fa-info-circle"></i> <span id="cameraMsg">Initializing camera...</span></div>
+                
+                <div style="background:#eff6ff; padding:14px; border-radius:12px; margin:16px 0; display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-map-marker-alt" style="color:var(--secondary); font-size: 1.4rem;"></i>
+                    <div><div id="gpsStatus" style="font-weight:700; font-size:1rem;" data-i18n="locating">Locating...</div><div id="gpsCoords" style="font-size:0.9rem; color:var(--gray-600);" data-i18n="gpsActive">GPS Active</div></div>
+                </div>
+                <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; background:var(--gray-50); padding:14px; border-radius:12px; margin: 12px 0;">
+                    <span style="font-size:1rem;"><i class="fas fa-user-secret"></i> <span data-i18n="reportAnonymously">Report Anonymously</span></span>
+                    <label class="toggle-checkbox">
+                        <input type="checkbox" id="anonToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <button class="btn btn-success btn-large" onclick="submitComplaint()"><span class="btn-text" data-i18n="submitComplaint">Submit Complaint</span><div class="loading-spinner"></div></button>
+            </div>
+            <button class="btn btn-outline" onclick="nav('home')" data-i18n="backHome">Back to Home</button>
+        </div>
+
+        <div id="track" class="screen">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-search-location"></i> <span data-i18n="trackComplaint">Track Complaint</span></div>
+                <div style="display:flex; gap:12px;">
+                    <input type="text" id="trackId" placeholder="Enter ID (e.g. NY-ABC123)" style="flex:1; margin:0;" data-i18n-placeholder="trackPlaceholder">
+                    <button class="btn btn-primary" onclick="trackComplaint()" style="width: auto; padding: 16px 24px; margin: 0; min-width: 60px;"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div id="trackResult" style="display:none;">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:16px; align-items: center;">
+                        <h3 id="trackIdDisplay" style="font-size: 1.4rem;"></h3>
+                        <span id="trackStatus" class="status-badge"></span>
+                    </div>
+                    
+                    <!-- ✅ LOW-LITERACY: Picture-based Status Display -->
+                    <div class="status-visual" id="statusVisual">
+                        <div class="status-icon"><i class="fas fa-hourglass-half"></i></div>
+                        <div>
+                            <div class="status-text" id="statusText">Submitted</div>
+                            <div class="status-subtext" id="statusSubtext">Your complaint is being reviewed</div>
+                        </div>
+                    </div>
+                    
+                    <p id="trackDesc" style="background:var(--gray-50); padding:16px; border-radius:12px; font-size:1.05rem; margin-bottom:16px; line-height: 1.6;"></p>
+                    <div id="trackImg"></div>
+                    
+                    <!-- ✅ NGO Verification Panel -->
+                    <div id="ngoVerificationPanel" style="display:none; background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:16px; margin:14px 0;">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                            <i class="fas fa-hand-holding-heart" style="color:#16a34a; font-size:1.3rem;"></i>
+                            <strong data-i18n="ngoVerification">NGO Verification</strong>
+                            <span id="ngoStatusBadge" class="status-badge"></span>
+                        </div>
+                        <div style="font-size:1rem; color:var(--gray-700);">
+                            <div><strong data-i18n="ngoOrg">Organization:</strong> <span id="ngoName">-</span></div>
+                            <div><strong data-i18n="ngoReviewed">Reviewed:</strong> <span id="ngoReviewedAt">-</span></div>
+                            <div id="ngoNotes" style="margin-top:8px; font-style:italic; color:var(--gray-600);"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- ✅ Escalation Panel -->
+                    <div id="escalationPanel" style="display:none; background:#fef3c7; border-left:5px solid #f59e0b; padding:16px; border-radius:0 10px 10px 0; margin:14px 0;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                            <i class="fas fa-arrow-up-wide-short" style="color:#b45309;"></i>
+                            <strong data-i18n="escalationStatus">Escalation Status</strong>
+                        </div>
+                        <div style="font-size:1rem; color:#92400e;">
+                            <div><strong data-i18n="escalationLevel">Current Level:</strong> <span id="escalationLevel">-</span></div>
+                            <div><strong data-i18n="escalatedTo">Escalated To:</strong> <span id="escalatedTo">-</span></div>
+                            <div><strong data-i18n="escalatedAt">Escalated At:</strong> <span id="escalatedAt">-</span></div>
+                            <div style="margin-top:10px; font-size:0.95rem; background:#fffbeb; padding:10px; border-radius:8px;">
+                                <i class="fas fa-info-circle"></i> <span id="escalationNote" data-i18n="escalationNote">Awaiting response from higher authority</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin:18px 0;"><strong style="display: block; margin-bottom: 12px; font-size:1.1rem;"><i class="fas fa-history"></i> <span data-i18n="updateHistory">Update History</span></strong><div id="trackTimeline" class="timeline"></div></div>
+                    <div><strong style="display: block; margin-bottom: 12px; font-size:1.1rem;"><i class="fas fa-shield-alt"></i> <span data-i18n="tamperProof">Tamper-Proof Hash Log</span></strong><div id="trackHash" class="hash-box" style="margin-top:10px;"></div></div>
+                </div>
+            </div>
+            <button class="btn btn-outline" onclick="nav('home')" data-i18n="backHome">Back to Home</button>
+        </div>
+
+        <div id="my-complaints" class="screen">
+            <div class="card"><div class="card-title"><i class="fas fa-list-ul"></i> <span data-i18n="myComplaints">My Complaints</span></div></div>
+            <div id="myList"></div>
+            <button class="btn btn-outline" onclick="nav('home')" data-i18n="backHome">Back to Home</button>
+        </div>
+
+        <div id="validate" class="screen">
+            <div class="card"><div class="card-title"><i class="fas fa-check-circle"></i> <span data-i18n="communityValidation">Community Validation</span></div><p style="color:var(--gray-600); font-size:1rem; margin-bottom:16px;" data-i18n="validateDesc">Verify if resolved issues are actually fixed</p></div>
+            <div id="validateList"></div>
+            <button class="btn btn-outline" onclick="nav('home')" data-i18n="backHome">Back to Home</button>
+        </div>
+
+        <div id="admin" class="screen">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-bar"></i> <span data-i18n="dashboardStats">Dashboard Statistics</span></div>
+                <div class="grid-2">
+                    <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label" data-i18n="total">Total</div></div>
+                    <div class="stat-box" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><div class="stat-num" id="statPending">0</div><div class="stat-label" data-i18n="pending">Pending</div></div>
+                    <div class="stat-box" style="background:linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);"><div class="stat-num" id="statProgress">0</div><div class="stat-label" data-i18n="inProgress">In Progress</div></div>
+                    <div class="stat-box" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="stat-num" id="statResolved">0</div><div class="stat-label" data-i18n="resolved">Resolved</div></div>
+                </div>
+            </div>
+            <div class="card"><div class="card-title"><i class="fas fa-tasks"></i> <span data-i18n="manageComplaints">Manage Complaints</span></div><div id="adminList"></div></div>
+            <button class="btn btn-outline" onclick="nav('home')" data-i18n="backHome">Back to Home</button>
+        </div>
+
+        <div id="call-report" class="screen">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-phone-volume"></i> <span data-i18n="reportViaCall">Report via Authority Call</span></div>
+                <p style="color:var(--gray-600); font-size:1rem; margin-bottom:20px;" data-i18n="callInstructions">Call the municipal helpline to register your complaint verbally. After the call, enter the reference number provided by the operator.</p>
+                <a href="tel:18001234567" class="btn btn-success btn-large" style="margin-bottom:20px; text-decoration: none;"><i class="fas fa-phone"></i> <span data-i18n="callNumber">Call 1800-123-4567</span></a>
+                <div class="divider"><span data-i18n="afterCall">AFTER CALL</span></div>
+                <div class="form-group"><label data-i18n="callRefLabel">Call Reference Number</label><div class="input-wrapper"><i class="fas fa-hashtag input-icon"></i><input type="text" id="callRef" placeholder="e.g. REF-8842" data-i18n-placeholder="callRefPlaceholder"></div></div>
+                <div class="form-group"><label data-i18n="issueSummaryLabel">Brief Issue Summary</label><div class="input-wrapper"><i class="fas fa-align-left input-icon"></i><textarea id="callSummary" rows="3" placeholder="What did you report?" style="padding:16px 16px 16px 48px;" data-i18n-placeholder="summaryPlaceholder"></textarea></div></div>
+                <button class="btn btn-primary btn-large" onclick="logCallComplaint()"><span class="btn-text" data-i18n="logCallComplaint">Log Call Complaint</span><div class="loading-spinner"></div></button>
+            </div>
+            <button class="btn btn-outline" onclick="nav('home')" data-i18n="backHome">Back to Home</button>
+        </div>
+
+        <div id="profile" class="screen">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+                <h2 id="profileName" style="font-size:1.5rem; margin-bottom: 6px;">User</h2>
+                <p id="profileEmail" style="opacity:0.9; font-size:1rem;">user@email.com</p>
+                <span id="profileRole" class="status-badge" style="background:rgba(255,255,255,0.3); color:white; margin-top:12px; display:inline-block; padding: 8px 18px;">Citizen</span>
+            </div>
+            <div style="margin-top:52px;">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-user-edit"></i> <span data-i18n="editProfile">Edit Profile</span></div>
+                    <div class="form-group"><label data-i18n="nameLabel">Full Name</label><div class="input-wrapper"><i class="fas fa-user input-icon"></i><input type="text" id="editName"></div></div>
+                    <div class="form-group"><label data-i18n="phoneLabel">Phone</label><div class="input-wrapper"><i class="fas fa-phone input-icon"></i><input type="tel" id="editPhone"></div></div>
+                    <div class="form-group"><label data-i18n="areaLabel">Area/Location</label><div class="input-wrapper"><i class="fas fa-map-marker-alt input-icon"></i><input type="text" id="editArea"></div></div>
+                    <button class="btn btn-primary" onclick="updateProfile()"><span class="btn-text" data-i18n="saveChanges">Save Changes</span><div class="loading-spinner"></div></button>
+                </div>
+                
+                <!-- ✅ Language Preferences Section -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-language"></i> <span data-i18n="languagePrefs">Language Preferences</span></div>
+                    <div class="form-group">
+                        <label data-i18n="appLanguageLabel">App Interface Language</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-globe input-icon"></i>
+                            <select id="appLanguage" onchange="changeAppLanguage(this.value)">
+                                <option value="en">🇬🇧 English</option>
+                                <option value="hi">🇮🇳 हिंदी</option>
+                                <option value="ta">🇮🇳 தமிழ்</option>
+                                <option value="te">🇮🇳 తెలుగు</option>
+                                <option value="bn">🇮🇳 বাংলা</option>
+                                <option value="mr">🇮🇳 मराठी</option>
+                                <option value="gu">🇮🇳 ગુજરાતી</option>
+                                <option value="kn">🇮🇳 ಕನ್ನಡ</option>
+                                <option value="ml">🇮🇳 മലയാളം</option>
+                                <option value="pa">🇮🇳 ਪੰਜਾਬੀ</option>
+                                <option value="or">🇮🇳 ଓଡ଼ିଆ</option>
+                                <option value="as">🇮🇳 অসমীয়া</option>
+                            </select>
+                        </div>
+                        <small style="color:var(--gray-600); display:block; margin-top:6px;">
+                            <i class="fas fa-info-circle"></i> <span data-i18n="voiceLangNote">Voice input language is set separately on the Report screen</span>
+                        </small>
+                    </div>
+                    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; background:var(--gray-50); padding:14px; border-radius:12px;">
+                        <span style="font-size:1rem;" data-i18n="autoDetectLang">Auto-detect location language</span>
+                        <label class="toggle-checkbox">
+                            <input type="checkbox" id="autoLangToggle" checked onchange="toggleAutoLang(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-cog"></i> <span data-i18n="preferences">Preferences</span></div>
+                    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; background:var(--gray-50); padding:14px; border-radius:12px; margin-bottom: 12px;">
+                        <span style="font-size:1rem;" data-i18n="smsNotifications">SMS Notifications</span>
+                        <label class="toggle-checkbox"><input type="checkbox" id="smsToggle"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; background:var(--gray-50); padding:14px; border-radius:12px;">
+                        <span style="font-size:1rem;" data-i18n="voiceGuidance">Voice Guidance</span>
+                        <label class="toggle-checkbox"><input type="checkbox" id="voiceToggle" checked><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-large" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+            </div>
+        </div>
+
+        <div id="bottomNav" class="bottom-nav">
+            <div class="nav-item active" onclick="nav('home')"><i class="fas fa-home"></i><span data-i18n="home">Home</span></div>
+            <div class="nav-item" onclick="nav('report')"><i class="fas fa-plus-circle"></i><span data-i18n="report">Report</span></div>
+            <div class="nav-item" onclick="nav('track')"><i class="fas fa-search"></i><span data-i18n="track">Track</span></div>
+            <div class="nav-item" onclick="nav('validate')"><i class="fas fa-users"></i><span data-i18n="validate">Validate</span></div>
+            <div class="nav-item" onclick="nav('profile')"><i class="fas fa-user"></i><span data-i18n="profile">Profile</span></div>
+        </div>
+    </div>
+
+    <script>
+        const DB_NAME = 'NyayaSetuPro';
+        let db, currentUser = null, gps = null, recognition = null, currentVoiceLang = 'en-IN', phoneStep = 1, cameraStream = null;
+       
+        // ✅ COMPLETE MULTI-LANGUAGE TRANSLATIONS (All UI elements)
+        const TRANSLATIONS = {
+            en: {
+                welcomeTitle: "Welcome to NyayaSetu", welcomeSubtitle: "Clean Community, Together",
+                emailTab: "Email / Google", phoneTab: "Phone Number",
+                emailLabel: "Email Address", emailPlaceholder: "name@example.com",
+                passwordLabel: "Password", passPlaceholder: "Enter your password",
+                loginBtn: "Login Securely", demoBtn: "Try Demo Login",
+                orText: "OR", googleBtn: "Continue with Google",
+                phoneLabel: "Mobile Number", phonePlaceholder: "+91 98765 43210", phoneHint: "Enter your 10-digit mobile number",
+                sendOtpBtn: "Send OTP", verifyOtpBtn: "Verify OTP",
+                otpLabel: "OTP Verification", otpPlaceholder: "Enter 6-digit OTP",
+                noAccount: "Don't have an account? <a onclick=\"showScreen('registerScreen')\">Register Now</a>",
+                registerTitle: "Create Account", registerSubtitle: "Join the clean community initiative",
+                nameLabel: "Full Name", namePlaceholder: "Enter full name",
+                roleLabel: "Role", roleCitizen: "Citizen", roleValidator: "Community Validator",
+                roleAdmin: "Govt Official", roleNGO: "NGO Partner",
+                confirmPasswordLabel: "Confirm Password", confirmPlaceholder: "Re-enter password",
+                passMatchError: "Passwords do not match", registerBtn: "Create Account",
+                hasAccount: "Already have an account? <a onclick=\"showScreen('loginScreen')\">Login</a>",
+                appName: "NyayaSetu", emergencyTitle: "🚨 Urgent Issue?", emergencyDesc: "Tap to call & report immediately",
+                callReportTitle: "Report via Call", callReportDesc: "Tap to call authority & log complaint",
+                quickActions: "Quick Actions", reportIssue: "Report Issue", trackStatus: "Track Status",
+                validate: "Validate", myReports: "My Reports", communityStats: "Community Stats",
+                total: "Total", pending: "Pending", resolved: "Resolved",
+                newComplaint: "New Complaint", needHelp: "Need Help?", tapToHear: "Tap to hear instructions in your language",
+                voiceHelp: "Voice input available in 12+ Indian languages",
+                categoryLabel: "What is the problem?", step1: "Select", step2: "Describe", step3: "Submit",
+                catGarbage: "Garbage", catDrainage: "Drainage", catToilet: "Toilet",
+                catWater: "Water", catRoad: "Road", catOther: "Other",
+                describeLabel: "Describe the Problem:", tapToSpeak: "Tap to Speak",
+                typePlaceholder: "Or type description here...", listening: "Listening...",
+                addPhoto: "Add Photo Evidence:", capture: "Capture", cancel: "Cancel",
+                takePhoto: "Take Photo", uploadPhoto: "Upload Photo",
+                locating: "Locating...", gpsActive: "GPS Active", reportAnonymously: "Report Anonymously",
+                submitComplaint: "Submit Complaint", backHome: "Back to Home",
+                trackComplaint: "Track Complaint", trackPlaceholder: "Enter ID (e.g. NY-ABC123)",
+                ngoVerification: "NGO Verification", ngoOrg: "Organization:", ngoReviewed: "Reviewed:",
+                escalationStatus: "Escalation Status", escalationLevel: "Current Level:",
+                escalatedTo: "Escalated To:", escalatedAt: "Escalated At:",
+                escalationNote: "Awaiting response from higher authority",
+                updateHistory: "Update History", tamperProof: "Tamper-Proof Hash Log",
+                myComplaints: "My Complaints", communityValidation: "Community Validation",
+                validateDesc: "Verify if resolved issues are actually fixed",
+                dashboardStats: "Dashboard Statistics", inProgress: "In Progress", manageComplaints: "Manage Complaints",
+                reportViaCall: "Report via Authority Call",
+                callInstructions: "Call the municipal helpline to register your complaint verbally. After the call, enter the reference number provided by the operator.",
+                callNumber: "Call 1800-123-4567", afterCall: "AFTER CALL",
+                callRefLabel: "Call Reference Number", callRefPlaceholder: "e.g. REF-8842",
+                issueSummaryLabel: "Brief Issue Summary", summaryPlaceholder: "What did you report?",
+                logCallComplaint: "Log Call Complaint",
+                editProfile: "Edit Profile", areaLabel: "Area/Location", saveChanges: "Save Changes",
+                languagePrefs: "Language Preferences", appLanguageLabel: "App Interface Language",
+                voiceLangNote: "Voice input language is set separately on the Report screen",
+                autoDetectLang: "Auto-detect location language", preferences: "Preferences",
+                smsNotifications: "SMS Notifications", voiceGuidance: "Voice Guidance", logout: "Logout",
+                home: "Home", report: "Report", track: "Track", profile: "Profile",
+                emailError: "Please enter a valid email", passError: "Password must be at least 6 characters",
+                phoneError: "Please enter a valid 10-digit number", otpError: "Invalid OTP",
+                statusSubmitted: "Submitted", statusInProgress: "In Progress", statusResolved: "Resolved",
+                statusNGOReview: "NGO Review", statusMunicipal: "Municipal Review", statusEscalated: "Escalated",
+                locationFound: "Location Found", complaintSubmitted: "Complaint submitted! ID:",
+                tapToSpeakLang: "Tap to Speak in", voiceRecorded: "Voice recorded", photoCaptured: "Photo captured",
+                photoUploaded: "Photo uploaded", profileUpdated: "Profile updated", loggedOut: "Logged out",
+                voteRecorded: "Vote recorded", statusUpdated: "Status updated", escalationAlert: "Complaint escalated",
+                ngoVerified: "Verified by NGO", ngoRejected: "Rejected by NGO", municipalAssigned: "Assigned to municipality"
+            },
+            hi: {
+                welcomeTitle: "न्यायसेतु में आपका स्वागत है", welcomeSubtitle: "स्वच्छ समुदाय, एक साथ",
+                emailTab: "ईमेल / गूगल", phoneTab: "फोन नंबर",
+                emailLabel: "ईमेल पता", emailPlaceholder: "naam@example.com",
+                passwordLabel: "पासवर्ड", passPlaceholder: "अपना पासवर्ड दर्ज करें",
+                loginBtn: "सुरक्षित लॉगिन करें", demoBtn: "डेमो लॉगिन आज़माएं",
+                orText: "या", googleBtn: "गूगल से जारी रखें",
+                phoneLabel: "मोबाइल नंबर", phonePlaceholder: "+91 98765 43210", phoneHint: "अपना 10-अंकीय मोबाइल नंबर दर्ज करें",
+                sendOtpBtn: "OTP भेजें", verifyOtpBtn: "OTP सत्यापित करें",
+                otpLabel: "OTP सत्यापन", otpPlaceholder: "6-अंकीय OTP दर्ज करें",
+                noAccount: "खाता नहीं है? <a onclick=\"showScreen('registerScreen')\">अभी पंजीकरण करें</a>",
+                registerTitle: "खाता बनाएं", registerSubtitle: "स्वच्छ समुदाय पहल में शामिल हों",
+                nameLabel: "पूरा नाम", namePlaceholder: "पूरा नाम दर्ज करें",
+                roleLabel: "भूमिका", roleCitizen: "नागरिक", roleValidator: "समुदाय सत्यापक",
+                roleAdmin: "सरकारी अधिकारी", roleNGO: "एनजीओ साझेदार",
+                confirmPasswordLabel: "पासवर्ड की पुष्टि करें", confirmPlaceholder: "पासवर्ड फिर दर्ज करें",
+                passMatchError: "पासवर्ड मेल नहीं खाते", registerBtn: "खाता बनाएं",
+                hasAccount: "पहले से खाता है? <a onclick=\"showScreen('loginScreen')\">लॉगिन करें</a>",
+                appName: "न्यायसेतु", emergencyTitle: "🚨 तत्काल समस्या?", emergencyDesc: "कॉल करें और तुरंत रिपोर्ट करें",
+                callReportTitle: "कॉल के माध्यम से रिपोर्ट करें", callReportDesc: "अधिकारी को कॉल करें और शिकायत लॉग करें",
+                quickActions: "त्वरित कार्य", reportIssue: "समस्या रिपोर्ट करें", trackStatus: "स्थिति ट्रैक करें",
+                validate: "सत्यापित करें", myReports: "मेरी रिपोर्ट्स", communityStats: "समुदाय आंकड़े",
+                total: "कुल", pending: "लंबित", resolved: "हल हुआ",
+                newComplaint: "नई शिकायत", needHelp: "मदद चाहिए?", tapToHear: "अपनी भाषा में निर्देश सुनने के लिए टैप करें",
+                voiceHelp: "12+ भारतीय भाषाओं में वॉइस इनपुट उपलब्ध",
+                categoryLabel: "समस्या क्या है?", step1: "चुनें", step2: "वर्णन करें", step3: "जमा करें",
+                catGarbage: "कचरा", catDrainage: "जल निकासी", catToilet: "शौचालय",
+                catWater: "पानी", catRoad: "सड़क", catOther: "अन्य",
+                describeLabel: "समस्या का वर्णन करें:", tapToSpeak: "बोलने के लिए टैप करें",
+                typePlaceholder: "या यहां विवरण टाइप करें...", listening: "सुन रहा हूं...",
+                addPhoto: "फोटो सबूत जोड़ें:", capture: "कैप्चर करें", cancel: "रद्द करें",
+                takePhoto: "फोटो लें", uploadPhoto: "फोटो अपलोड करें",
+                locating: "स्थान खोज रहा है...", gpsActive: "GPS सक्रिय", reportAnonymously: "गुमनाम रिपोर्ट करें",
+                submitComplaint: "शिकायत जमा करें", backHome: "होम पर वापस",
+                trackComplaint: "शिकायत ट्रैक करें", trackPlaceholder: "आईडी दर्ज करें (जैसे NY-ABC123)",
+                ngoVerification: "एनजीओ सत्यापन", ngoOrg: "संगठन:", ngoReviewed: "समीक्षा की गई:",
+                escalationStatus: "एस्केलेशन स्थिति", escalationLevel: "वर्तमान स्तर:",
+                escalatedTo: "एस्केलेट किया गया:", escalatedAt: "एस्केलेशन समय:",
+                escalationNote: "उच्च अधिकारी से प्रतिक्रिया की प्रतीक्षा",
+                updateHistory: "अपडेट इतिहास", tamperProof: "टैम्पर-प्रूफ हैश लॉग",
+                myComplaints: "मेरी शिकायतें", communityValidation: "समुदाय सत्यापन",
+                validateDesc: "जांचें कि हल की गई समस्याएं वास्तव में ठीक हुई हैं या नहीं",
+                dashboardStats: "डैशबोर्ड आंकड़े", inProgress: "प्रगति पर", manageComplaints: "शिकायतें प्रबंधित करें",
+                reportViaCall: "अधिकारी कॉल के माध्यम से रिपोर्ट करें",
+                callInstructions: "अपनी शिकायत मौखिक रूप से पंजीकृत करने के लिए नगरपालिका हेल्पलाइन पर कॉल करें। कॉल के बाद, ऑपरेटर द्वारा प्रदान किए गए संदर्भ नंबर दर्ज करें।",
+                callNumber: "1800-123-4567 पर कॉल करें", afterCall: "कॉल के बाद",
+                callRefLabel: "कॉल संदर्भ नंबर", callRefPlaceholder: "जैसे REF-8842",
+                issueSummaryLabel: "संक्षिप्त समस्या सारांश", summaryPlaceholder: "आपने क्या रिपोर्ट किया?",
+                logCallComplaint: "कॉल शिकायत लॉग करें",
+                editProfile: "प्रोफाइल संपादित करें", areaLabel: "क्षेत्र/स्थान", saveChanges: "परिवर्तन सहेजें",
+                languagePrefs: "भाषा प्राथमिकताएं", appLanguageLabel: "ऐप इंटरफेस भाषा",
+                voiceLangNote: "वॉइस इनपुट भाषा रिपोर्ट स्क्रीन पर अलग से सेट की जाती है",
+                autoDetectLang: "स्थान भाषा स्वतः पहचानें", preferences: "प्राथमिकताएं",
+                smsNotifications: "SMS सूचनाएं", voiceGuidance: "वॉइस मार्गदर्शन", logout: "लॉगआउट",
+                home: "होम", report: "रिपोर्ट", track: "ट्रैक", profile: "प्रोफाइल",
+                emailError: "कृपया एक वैध ईमेल दर्ज करें", passError: "पासवर्ड कम से कम 6 अक्षर का होना चाहिए",
+                phoneError: "कृपया एक वैध 10-अंकीय नंबर दर्ज करें", otpError: "अमान्य OTP",
+                statusSubmitted: "जमा किया गया", statusInProgress: "प्रगति पर", statusResolved: "हल हो गया",
+                statusNGOReview: "एनजीओ समीक्षा", statusMunicipal: "नगरपालिका समीक्षा", statusEscalated: "एस्केलेटेड",
+                locationFound: "स्थान मिल गया", complaintSubmitted: "शिकायत जमा! आईडी:",
+                tapToSpeakLang: "बोलने के लिए टैप करें", voiceRecorded: "आवाज रिकॉर्ड की गई",
+                photoCaptured: "फोटो कैप्चर की गई", photoUploaded: "फोटो अपलोड की गई",
+                profileUpdated: "प्रोफाइल अपडेट की गई", loggedOut: "लॉगआउट किया गया",
+                voteRecorded: "वोट रिकॉर्ड किया गया", statusUpdated: "स्थिति अपडेट की गई",
+                escalationAlert: "शिकायत एस्केलेट की गई", ngoVerified: "एनजीओ द्वारा सत्यापित",
+                ngoRejected: "एनजीओ द्वारा अस्वीकृत", municipalAssigned: "नगरपालिका को सौंपा गया"
+            }
+            // 🔹 Add more languages: ta, te, bn, mr, gu, kn, ml, pa, or, as following same pattern
+        };
+
+        // ✅ ESCALATION CONFIGURATION
+        const ESCALATION_CONFIG = {
+            municipal_response_hours: 72,
+            higher_authority_levels: [
+                { level: 1, title: 'Municipal Commissioner', email: 'commissioner@city.gov' },
+                { level: 2, title: 'District Collector', email: 'collector@district.gov' },
+                { level: 3, title: 'State Grievance Cell', email: 'grievance@state.gov' }
+            ]
+        };
+       
+        const INDIAN_LANGUAGES = {
+            'en-IN': { name: 'English', flag: '🇬🇧' }, 'hi-IN': { name: 'Hindi', flag: '🇮🇳' }, 'ta-IN': { name: 'Tamil', flag: '🇮🇳' },
+            'te-IN': { name: 'Telugu', flag: '🇮🇳' }, 'bn-IN': { name: 'Bengali', flag: '🇮🇳' }, 'mr-IN': { name: 'Marathi', flag: '🇮🇳' },
+            'gu-IN': { name: 'Gujarati', flag: '🇮🇳' }, 'kn-IN': { name: 'Kannada', flag: '🇮🇳' }, 'ml-IN': { name: 'Malayalam', flag: '🇮🇳' },
+            'pa-IN': { name: 'Punjabi', flag: '🇮🇳' }, 'or-IN': { name: 'Odia', flag: '🇮🇳' }, 'as-IN': { name: 'Assamese', flag: '🇮🇳' }
+        };
+       
+        const initDB = () => new Promise((res, rej) => {
+            const r = indexedDB.open(DB_NAME, 4);
+            r.onerror = () => rej(r.error);
+            r.onsuccess = () => { db = r.result; res(db); };
+            r.onupgradeneeded = e => {
+                const d = e.target.result;
+                if(!d.objectStoreNames.contains('users')) d.createObjectStore('users', {keyPath:'email'});
+                if(!d.objectStoreNames.contains('complaints')) {
+                    const s = d.createObjectStore('complaints', {keyPath:'id'});
+                    s.createIndex('userId', 'userId', {unique:false});
+                    s.createIndex('status', 'status', {unique:false});
+                    s.createIndex('ngoStatus', 'verification.ngoStatus', {unique:false});
+                }
+                if(!d.objectStoreNames.contains('hashlog')) d.createObjectStore('hashlog', {keyPath:'id', autoIncrement:true});
+                if(!d.objectStoreNames.contains('sessions')) d.createObjectStore('sessions', {keyPath:'id'});
+                if(!d.objectStoreNames.contains('calls')) d.createObjectStore('calls', {keyPath:'id'});
+                if(!d.objectStoreNames.contains('ngos')) {
+                    const ngoStore = d.createObjectStore('ngos', {keyPath:'id'});
+                    ngoStore.createIndex('location', 'location', {unique:false});
+                }
+            };
+        });
+
+        function showScreen(id) {
+            document.querySelectorAll('.auth-card').forEach(c => c.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+        function switchAuthTab(type, e) {
+            e.preventDefault();
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            document.getElementById('emailForm').style.display = type === 'email' ? 'block' : 'none';
+            document.getElementById('phoneForm').style.display = type === 'phone' ? 'block' : 'none';
+            if(type === 'email') {
+                phoneStep = 1;
+                document.getElementById('phoneBtnText').textContent = getTranslation('sendOtpBtn');
+                document.getElementById('otpGroup').style.display = 'none';
+                document.getElementById('loginPhone').value = '';
+                document.getElementById('loginOtp').value = '';
+                document.getElementById('phoneGroup').classList.remove('error');
+                document.getElementById('otpGroup').classList.remove('error');
+            }
+        }
+        function togglePass(id, icon) {
+            const inp = document.getElementById(id);
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+        function toast(msg, type='success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast show ${type}`;
+            setTimeout(() => t.classList.remove('show'), 4000);
+        }
+        function setLoading(btn, load) {
+            btn.classList.toggle('loading', load);
+            btn.disabled = load;
+        }
+        function safeEncode(str) {
+            try { return btoa(unescape(encodeURIComponent(str))); }
+            catch(e) { return btoa(str); }
+        }
+        
+        // ✅ TRANSLATION HELPER FUNCTIONS
+        function getTranslation(key, lang = null) {
+            const targetLang = lang || (currentUser?.preferences?.language) || localStorage.getItem('nyayaSetu_lang') || 'en';
+            return TRANSLATIONS[targetLang]?.[key] || TRANSLATIONS['en'][key] || key;
+        }
+        
+        function applyTranslations(lang = null) {
+            const targetLang = lang || (currentUser?.preferences?.language) || localStorage.getItem('nyayaSetu_lang') || 'en';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                const translation = getTranslation(key, targetLang);
+                if(translation) {
+                    if(translation.includes('<a')) {
+                        el.innerHTML = translation;
+                    } else {
+                        el.textContent = translation;
+                    }
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                const translation = getTranslation(key, targetLang);
+                if(translation) el.placeholder = translation;
+            });
+            
+            // Update dynamic elements
+            if(document.getElementById('micText')) {
+                const langInfo = INDIAN_LANGUAGES[currentVoiceLang];
+                const baseText = getTranslation('tapToSpeak', targetLang);
+                document.getElementById('micText').innerHTML = 
+                    `<i class="fas fa-microphone"></i> ${baseText} ${langInfo.flag} ${langInfo.name}`;
+            }
+            
+            // Update status visuals
+            updateStatusVisuals();
+        }
+        
+        function changeAppLanguage(langCode) {
+            if(!TRANSLATIONS[langCode]) {
+                toast('Language not supported yet', 'error');
+                return;
+            }
+            
+            if(currentUser) {
+                currentUser.preferences = currentUser.preferences || {};
+                currentUser.preferences.language = langCode;
+                db.transaction('users', 'readwrite').objectStore('users').put(currentUser);
+            }
+            localStorage.setItem('nyayaSetu_lang', langCode);
+            
+            applyTranslations(langCode);
+            
+            toast(`Language changed to ${langCode.toUpperCase()}`);
+            if(document.getElementById('voiceToggle')?.checked !== false) {
+                speak(`Language changed to ${TRANSLATIONS[langCode]?.appName || langCode}`);
+            }
+        }
+        
+        function toggleAutoLang(enabled) {
+            if(currentUser) {
+                currentUser.preferences = currentUser.preferences || {};
+                currentUser.preferences.autoDetectLang = enabled;
+                db.transaction('users', 'readwrite').objectStore('users').put(currentUser);
+            }
+            if(enabled && gps) detectLanguageFromLocation();
+            toast(enabled ? 'Auto language detection enabled' : 'Auto detection disabled');
+        }
+        
+        // ✅ LOW-LITERACY: Toggle High Contrast Mode
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+            const btn = document.getElementById('contrastBtn');
+            btn.classList.toggle('active');
+            toast(document.body.classList.contains('high-contrast') ? 'High contrast enabled' : 'High contrast disabled');
+            localStorage.setItem('nyayaSetu_contrast', document.body.classList.contains('high-contrast'));
+        }
+        
+        // ✅ LOW-LITERACY: Toggle Simplified Mode (larger text, icons only)
+        function toggleSimplifiedMode() {
+            document.body.classList.toggle('simplified');
+            const btn = document.getElementById('simpleBtn');
+            btn.classList.toggle('active');
+            toast(document.body.classList.contains('simplified') ? 'Simplified view enabled' : 'Standard view');
+            localStorage.setItem('nyayaSetu_simple', document.body.classList.contains('simplified'));
+        }
+        
+        // ✅ LOW-LITERACY: Speak Current Screen Instructions
+        function speakCurrentScreen() {
+            if(!document.getElementById('voiceToggle')?.checked !== false) return;
+            const screen = document.querySelector('.screen.active').id;
+            const instructions = {
+                'home': 'Home screen. Use Quick Actions to report or track complaints.',
+                'report': 'Report screen. Select a category, describe the problem, add photo, then submit.',
+                'track': 'Track screen. Enter your complaint ID to see status updates.',
+                'profile': 'Profile screen. Edit your details and change language settings.',
+                'validate': 'Validate screen. Help verify if resolved issues are actually fixed.',
+                'my-complaints': 'My Complaints screen. View all your submitted reports.',
+                'admin': 'Admin dashboard. Manage and update complaint statuses.',
+                'call-report': 'Call Report screen. Call the helpline or log a call reference.'
+            };
+            speak(getTranslation(instructions[screen] || 'Welcome to NyayaSetu'));
+        }
+        
+        // ✅ LOW-LITERACY: Speak Contextual Instructions
+        function speakInstructions(context) {
+            if(document.getElementById('voiceToggle')?.checked === false) return;
+            const instructions = {
+                'report': 'Step 1: Tap a category icon. Step 2: Tap the microphone to speak or type your description. Step 3: Add a photo if possible. Step 4: Tap Submit.',
+                'track': 'Enter your complaint ID in the box, then tap the search icon to see the status.',
+                'profile': 'Edit your name, phone, or area. Change app language or enable voice guidance.'
+            };
+            speak(getTranslation(instructions[context] || 'Need help? Tap the speaker icon to hear instructions.'));
+        }
+
+        function demoLogin() {
+            createSession({ 
+                email: 'demo@nyayasetu.app', 
+                name: 'Demo User', 
+                phone: '9999999999', 
+                role: 'citizen', 
+                password: safeEncode('123456'), 
+                provider: 'email', 
+                createdAt: new Date().toISOString(),
+                preferences: { language: 'en', autoDetectLang: true }
+            });
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            const emailGroup = document.getElementById('emailGroup');
+            const passGroup = document.getElementById('passGroup');
+            const btn = document.getElementById('loginBtn');
+            emailGroup.classList.remove('error'); passGroup.classList.remove('error');
+            if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailGroup.classList.add('error'); return; }
+            if(pass.length < 6) { passGroup.classList.add('error'); return; }
+            setLoading(btn, true); await new Promise(r => setTimeout(r, 600));
+            const tx = db.transaction('users', 'readonly');
+            const req = tx.objectStore('users').get(email);
+            req.onsuccess = () => {
+                const user = req.result;
+                if(!user) { toast('Account not found. Please register first.', 'error'); setLoading(btn, false); return; }
+                if(user.password !== safeEncode(pass)) { toast('Invalid password', 'error'); setLoading(btn, false); return; }
+                createSession(user);
+            };
+            req.onerror = () => { toast('Database error', 'error'); setLoading(btn, false); };
+        }
+        
+        async function handleGoogleLogin() {
+            const btn = event.target.closest('.btn'); setLoading(btn, true); await new Promise(r => setTimeout(r, 800));
+            const mockUser = { 
+                email: 'user@gmail.com', 
+                name: 'Google User', 
+                phone: '', 
+                role: 'citizen', 
+                password: safeEncode('google123'), 
+                provider: 'google', 
+                createdAt: new Date().toISOString(),
+                preferences: { language: 'en', autoDetectLang: true }
+            };
+            const tx = db.transaction('users', 'readwrite');
+            const check = tx.objectStore('users').get(mockUser.email);
+            check.onsuccess = () => { if(!check.result) tx.objectStore('users').add(mockUser); createSession(check.result || mockUser); };
+            check.onerror = () => { toast('Login failed', 'error'); setLoading(btn, false); };
+        }
+        
+        async function handlePhoneLogin() {
+            const phone = document.getElementById('loginPhone').value.replace(/\D/g,'');
+            const otp = document.getElementById('loginOtp').value;
+            const btn = document.getElementById('phoneBtn');
+            const phoneGroup = document.getElementById('phoneGroup');
+            const otpGroup = document.getElementById('otpGroup');
+            if(phoneStep === 1) {
+                if(phone.length !== 10) { phoneGroup.classList.add('error'); return; }
+                phoneGroup.classList.remove('error'); setLoading(btn, true); await new Promise(r => setTimeout(r, 600));
+                toast('OTP sent to your phone'); otpGroup.style.display = 'block';
+                document.getElementById('phoneBtnText').textContent = getTranslation('verifyOtpBtn') || 'Verify OTP'; phoneStep = 2; setLoading(btn, false);
+            } else {
+                if(otp.length !== 6) { otpGroup.classList.add('error'); return; }
+                setLoading(btn, true); await new Promise(r => setTimeout(r, 600));
+                const email = `phone_${phone}@nyayasetu.app`;
+                const mockUser = { 
+                    email, 
+                    name: `User ${phone.slice(-4)}`, 
+                    phone: `+91${phone}`, 
+                    role: 'citizen', 
+                    password: safeEncode(otp), 
+                    provider: 'phone', 
+                    createdAt: new Date().toISOString(),
+                    preferences: { language: 'en', autoDetectLang: true }
+                };
+                const tx = db.transaction('users', 'readwrite');
+                const check = tx.objectStore('users').get(email);
+                check.onsuccess = () => { if(!check.result) tx.objectStore('users').add(mockUser); createSession(check.result || mockUser); };
+                check.onerror = () => { toast('Verification failed', 'error'); setLoading(btn, false); };
+            }
+        }
+        
+        async function handleRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const role = document.getElementById('regRole').value;
+            const pass = document.getElementById('regPass').value;
+            const confirm = document.getElementById('regConfirm').value;
+            const matchErr = document.getElementById('regMatchError');
+            const btn = event.target.closest('.btn');
+            matchErr.style.display = 'none';
+            if(!name || !email || !pass) { toast('Fill all required fields', 'error'); return; }
+            if(pass.length < 6) { toast('Password min 6 chars', 'error'); return; }
+            if(pass !== confirm) { matchErr.style.display = 'block'; return; }
+            setLoading(btn, true); await new Promise(r => setTimeout(r, 600));
+            const tx = db.transaction('users', 'readwrite');
+            const check = tx.objectStore('users').get(email);
+            check.onsuccess = () => {
+                if(check.result) { toast('Email already exists', 'error'); setLoading(btn, false); return; }
+                tx.objectStore('users').add({ 
+                    email, name, phone, role, 
+                    password: safeEncode(pass), 
+                    provider: 'email', 
+                    createdAt: new Date().toISOString(),
+                    preferences: { language: 'en', autoDetectLang: true }
+                });
+                toast('Account created! Please login.'); showScreen('loginScreen'); document.getElementById('loginEmail').value = email; setLoading(btn, false);
+            };
+            check.onerror = () => { toast('Registration failed', 'error'); setLoading(btn, false); };
+        }
+        
+        function createSession(user) {
+            const tx = db.transaction('sessions', 'readwrite');
+            tx.objectStore('sessions').put({ id: 'active', userId: user.email, loginAt: new Date().toISOString() });
+            currentUser = user;
+            document.getElementById('authWrapper').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('bottomNav').classList.add('active');
+            document.getElementById('headerName').textContent = user.name;
+            document.getElementById('headerRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            document.getElementById('headerAvatar').textContent = user.name.charAt(0).toUpperCase();
+            
+            // Load language preference
+            const savedLang = user.preferences?.language || localStorage.getItem('nyayaSetu_lang') || 'en';
+            if(savedLang !== 'en') {
+                changeAppLanguage(savedLang);
+                document.getElementById('appLanguage').value = savedLang;
+            }
+            
+            // Load accessibility preferences
+            if(localStorage.getItem('nyayaSetu_contrast') === 'true') {
+                document.body.classList.add('high-contrast');
+                document.getElementById('contrastBtn').classList.add('active');
+            }
+            if(localStorage.getItem('nyayaSetu_simple') === 'true') {
+                document.body.classList.add('simplified');
+                document.getElementById('simpleBtn').classList.add('active');
+            }
+            
+            // Show/hide nav items based on role
+            const validateNav = document.querySelectorAll('.nav-item')[3];
+            if(user.role === 'admin' || user.role === 'ngo') {
+                validateNav.style.display = 'block';
+            } else {
+                validateNav.style.display = 'none';
+            }
+            
+            loadHomeStats(); nav('home'); speak(`${getTranslation('welcome', savedLang)} ${user.name}`);
+        }
+        
+        function logout() {
+            const tx = db.transaction('sessions', 'readwrite');
+            tx.objectStore('sessions').delete('active'); currentUser = null;
+            document.getElementById('authWrapper').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('bottomNav').classList.remove('active'); showScreen('loginScreen');
+            toast(getTranslation('loggedOut') || 'Logged out successfully');
+        }
+        
+        function nav(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(screen).classList.add('active');
+            const map = {home:0, report:1, track:2, validate:3, profile:4};
+            if(map[screen] !== undefined) document.querySelectorAll('.nav-item')[map[screen]].classList.add('active');
+            if(screen === 'validate') loadValidation();
+            if(screen === 'admin') loadAdmin();
+            if(screen === 'my-complaints') loadMyComplaints();
+            if(screen === 'profile') loadProfile();
+            if(screen === 'home') loadHomeStats();
+            
+            // ✅ LOW-LITERACY: Auto-speak instructions when navigating (if enabled)
+            if(document.getElementById('voiceToggle')?.checked !== false) {
+                setTimeout(() => speakInstructions(screen), 500);
+            }
+        }
+        
+        function loadProfile() {
+            if(!currentUser) return;
+            document.getElementById('profileName').textContent = currentUser.name;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('profileRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+            document.getElementById('profileAvatar').textContent = currentUser.name.charAt(0);
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editPhone').value = currentUser.phone || '';
+            document.getElementById('editArea').value = currentUser.area || '';
+            
+            const savedLang = currentUser.preferences?.language || localStorage.getItem('nyayaSetu_lang') || 'en';
+            document.getElementById('appLanguage').value = savedLang;
+            document.getElementById('autoLangToggle').checked = currentUser.preferences?.autoDetectLang !== false;
+        }
+        
+        function updateProfile() {
+            if(!currentUser) return;
+            currentUser.name = document.getElementById('editName').value.trim() || currentUser.name;
+            currentUser.phone = document.getElementById('editPhone').value.trim();
+            currentUser.area = document.getElementById('editArea').value.trim();
+            const tx = db.transaction('users', 'readwrite');
+            tx.objectStore('users').put(currentUser);
+            document.getElementById('headerName').textContent = currentUser.name;
+            document.getElementById('headerAvatar').textContent = currentUser.name.charAt(0);
+            loadProfile(); toast(getTranslation('profileUpdated') || 'Profile updated successfully');
+        }
+        
+        // ✅ LOW-LITERACY: Visual Category Selection
+        function selectCategory(cat, element) {
+            // Remove selected class from all
+            document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+            // Add to clicked
+            element.classList.add('selected');
+            // Set hidden input
+            document.getElementById('issueCat').value = cat;
+            // Update wizard step
+            updateWizardStep(2);
+            // Speak confirmation
+            if(document.getElementById('voiceToggle')?.checked !== false) {
+                const catName = getTranslation(`cat${cat.charAt(0).toUpperCase() + cat.slice(1)}`);
+                speak(`${catName} selected. Now describe the problem.`);
+            }
+        }
+        
+        // ✅ LOW-LITERACY: Wizard Step Management
+        function updateWizardStep(step) {
+            for(let i=1; i<=3; i++) {
+                const el = document.getElementById(`step${i}`);
+                el.classList.remove('active', 'completed');
+                if(i < step) el.classList.add('completed');
+                if(i === step) el.classList.add('active');
+            }
+        }
+        
+        function initSpeech() {
+            if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SR();
+                recognition.continuous = false; recognition.interimResults = false; recognition.lang = currentVoiceLang;
+                recognition.onstart = () => {
+                    document.getElementById('micBtn').classList.add('recording');
+                    const langInfo = INDIAN_LANGUAGES[currentVoiceLang];
+                    document.getElementById('micText').textContent = `Listening in ${langInfo.flag} ${langInfo.name}...`;
+                    document.getElementById('voiceStatus').style.display = 'block';
+                    document.getElementById('voiceMsg').textContent = `Listening in ${langInfo.name}...`;
+                    speak('Listening');
+                };
+                recognition.onend = () => {
+                    document.getElementById('micBtn').classList.remove('recording');
+                    const langInfo = INDIAN_LANGUAGES[currentVoiceLang];
+                    document.getElementById('micText').innerHTML = `<i class="fas fa-microphone"></i> ${getTranslation('tapToSpeak')} ${langInfo.flag} ${langInfo.name}`;
+                    setTimeout(() => document.getElementById('voiceStatus').style.display = 'none', 2000);
+                };
+                recognition.onresult = e => {
+                    const transcript = e.results[0][0].transcript;
+                    document.getElementById('descInput').value += (document.getElementById('descInput').value ? ' ' : '') + transcript;
+                    const langInfo = INDIAN_LANGUAGES[currentVoiceLang];
+                    toast(`Voice captured in ${langInfo.name}`); speak(getTranslation('voiceRecorded') || 'Voice recorded');
+                };
+                recognition.onerror = e => {
+                    document.getElementById('micBtn').classList.remove('recording');
+                    const langInfo = INDIAN_LANGUAGES[currentVoiceLang];
+                    document.getElementById('micText').innerHTML = `<i class="fas fa-microphone"></i> ${getTranslation('tapToSpeak')} ${langInfo.flag} ${langInfo.name}`;
+                    document.getElementById('voiceStatus').style.display = 'block';
+                    document.getElementById('voiceStatus').className = 'status-box error-box';
+                    document.getElementById('voiceMsg').textContent = `Error: ${e.error}. Try again or type.`;
+                    setTimeout(() => { document.getElementById('voiceStatus').style.display = 'none'; document.getElementById('voiceStatus').className = 'status-box'; }, 4000);
+                };
+            }
+        }
+        
+        function changeVoiceLanguage() {
+            const select = document.getElementById('voiceLang');
+            const selectedLang = select.value;
+            currentVoiceLang = selectedLang;
+            const langInfo = INDIAN_LANGUAGES[selectedLang];
+            const micText = document.getElementById('micText');
+            if(micText) micText.innerHTML = `<i class="fas fa-microphone"></i> ${getTranslation('tapToSpeak')} ${langInfo.flag} ${langInfo.name}`;
+            const langBadge = document.getElementById('langDetected');
+            if(langBadge) { langBadge.textContent = 'Selected'; langBadge.style.background = 'var(--primary)'; }
+            if(recognition) recognition.lang = currentVoiceLang;
+            toast(`Language changed to ${langInfo.name}`);
+            if(document.getElementById('voiceToggle')?.checked !== false) speak(`Language changed to ${langInfo.name}`);
+        }
+        
+        function detectLanguageFromLocation() {
+            if(!gps || currentUser?.preferences?.autoDetectLang === false) return;
+            const { lat, lng } = gps;
+            let detected = 'en-IN';
+            if(lat > 20 && lat < 30 && lng > 70 && lng < 80) detected = (lng < 75) ? 'pa-IN' : 'hi-IN';
+            else if(lat < 20 && lat > 10 && lng > 75 && lng < 80) detected = (lng < 77) ? 'kn-IN' : (lng > 78) ? 'te-IN' : 'ml-IN';
+            else if(lat > 20 && lat < 25 && lng > 85 && lng < 90) detected = 'bn-IN';
+            else if(lat > 15 && lat < 22 && lng > 72 && lng < 75) detected = 'gu-IN';
+            else if(lat > 18 && lat < 20 && lng > 73 && lng < 75) detected = 'mr-IN';
+            else if(lat > 10 && lat < 15 && lng > 76 && lng < 80) detected = 'ta-IN';
+            if(detected !== 'en-IN') setVoiceLanguage(detected);
+        }
+        
+        function setVoiceLanguage(langCode) {
+            if(INDIAN_LANGUAGES[langCode]) {
+                currentVoiceLang = langCode;
+                document.getElementById('voiceLang').value = langCode;
+                const langInfo = INDIAN_LANGUAGES[langCode];
+                document.getElementById('micText').innerHTML = `<i class="fas fa-microphone"></i> ${getTranslation('tapToSpeak')} ${langInfo.flag} ${langInfo.name}`;
+                document.getElementById('langDetected').textContent = 'Detected';
+                document.getElementById('langDetected').style.background = 'var(--success)';
+                if(recognition) recognition.lang = langCode;
+            }
+        }
+        
+        function toggleVoice() {
+            if(!recognition) { toast('Voice not supported. Use Chrome on Android.', 'error'); return; }
+            if(document.getElementById('micBtn').classList.contains('recording')) recognition.stop();
+            else { try { recognition.start(); } catch(e) { toast('Voice already running', 'error'); } }
+        }
+        
+        function speak(txt) {
+            if('speechSynthesis' in window && document.getElementById('voiceToggle')?.checked !== false) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(txt);
+                utterance.rate = 0.85; // ✅ LOW-LITERACY: Slower speech
+                utterance.pitch = 1.1;
+                const voices = window.speechSynthesis.getVoices();
+                const indianVoice = voices.find(v => v.lang.includes('en-IN') || v.name.includes('India'));
+                if(indianVoice) utterance.voice = indianVoice;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        function initGPS() {
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(p => {
+                    gps = {lat: p.coords.latitude, lng: p.coords.longitude};
+                    document.getElementById('gpsStatus').textContent = getTranslation('locationFound') || 'Location Found';
+                    document.getElementById('gpsStatus').style.color = 'var(--success)';
+                    document.getElementById('gpsCoords').textContent = `${gps.lat.toFixed(4)}, ${gps.lng.toFixed(4)}`;
+                    detectLanguageFromLocation();
+                }, () => {
+                    document.getElementById('gpsStatus').textContent = 'GPS Error';
+                    document.getElementById('gpsStatus').style.color = 'var(--danger)';
+                    document.getElementById('gpsCoords').textContent = 'Using default location';
+                    gps = {lat: 19.076, lng: 72.8777};
+                }, { enableHighAccuracy: true, timeout: 10000 });
+            }
+        }
+        
+        async function openCameraModal() {
+            const modal = document.getElementById('cameraModal');
+            const video = document.getElementById('cameraVideo');
+            const statusBox = document.getElementById('cameraStatus');
+            const cameraMsg = document.getElementById('cameraMsg');
+            modal.style.display = 'flex'; statusBox.style.display = 'block';
+            cameraMsg.textContent = 'Requesting camera access...'; statusBox.className = 'status-box';
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+                video.srcObject = cameraStream;
+                cameraMsg.textContent = 'Camera ready. Position and tap Capture.'; statusBox.className = 'status-box success-box';
+                speak('Camera ready. Position the problem in frame and tap capture.');
+            } catch (err) {
+                console.error('Camera error:', err);
+                cameraMsg.textContent = `Camera error: ${err.message}. Try uploading a photo instead.`;
+                statusBox.className = 'status-box error-box'; toast('Camera access denied or unavailable', 'error');
+                setTimeout(() => { closeCamera(); document.getElementById('photoInput').click(); }, 2500);
+            }
+        }
+        
+        function closeCamera() {
+            const modal = document.getElementById('cameraModal');
+            const video = document.getElementById('cameraVideo');
+            if(cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); cameraStream = null; }
+            video.srcObject = null; modal.style.display = 'none'; document.getElementById('cameraStatus').style.display = 'none';
+        }
+        
+        function capturePhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('cameraCanvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 1280; canvas.height = video.videoHeight || 720;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.85);
+            const imgPreview = document.getElementById('imgPreview');
+            imgPreview.src = imageData; imgPreview.classList.add('show');
+            document.getElementById('retakeBtn').style.display = 'flex';
+            closeCamera();
+            compressImage(imageData, 0.8).then(compressed => {
+                imgPreview.src = compressed; toast(getTranslation('photoCaptured') || 'Photo captured successfully!'); speak(getTranslation('photoCaptured'));
+            });
+            updateWizardStep(3);
+        }
+        
+        function retakePhoto() {
+            document.getElementById('imgPreview').classList.remove('show');
+            document.getElementById('retakeBtn').style.display = 'none';
+            document.getElementById('photoInput').value = '';
+            if(confirm('Take a new photo with camera? Click Cancel to upload from gallery.')) openCameraModal();
+            else document.getElementById('photoInput').click();
+        }
+        
+        function previewImg(inp) {
+            if(inp.files && inp.files[0]) {
+                const file = inp.files[0];
+                if(file.size > 5 * 1024 * 1024) { toast('Image too large. Max 5MB allowed.', 'error'); inp.value = ''; return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('imgPreview');
+                    img.src = e.target.result; img.classList.add('show'); document.getElementById('retakeBtn').style.display = 'flex';
+                    compressImage(e.target.result, 0.8).then(compressed => { img.src = compressed; });
+                    toast(getTranslation('photoUploaded') || 'Photo uploaded successfully'); speak(getTranslation('photoUploaded'));
+                };
+                reader.readAsDataURL(file);
+            }
+            updateWizardStep(3);
+        }
+        
+        function compressImage(dataUrl, quality = 0.8) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 1280; const maxHeight = 960;
+                    let width = img.width; let height = img.height;
+                    if(width > height) { if(width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; } }
+                    else { if(height > maxHeight) { width = Math.round(width * maxHeight / height); height = maxHeight; } }
+                    canvas.width = width; canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = () => resolve(dataUrl);
+                img.src = dataUrl;
+            });
+        }
+        
+        class HashChain {
+            static async gen(data, prev) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(data) + prev + Date.now()));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+            }
+            static async add(cId, action, meta) {
+                const tx = db.transaction('hashlog', 'readonly');
+                const all = await new Promise(r => tx.objectStore('hashlog').getAll().onsuccess = e => r(e.target.result));
+                const prev = all.length ? all[all.length-1].hash : '0'.repeat(64);
+                const hash = await this.gen({cId, action, meta}, prev);
+                const entry = {cId, action, meta: JSON.stringify(meta), ts: new Date().toISOString(), prev, hash};
+                db.transaction('hashlog', 'readwrite').objectStore('hashlog').add(entry);
+                return entry;
+            }
+            static async get(cId) {
+                const tx = db.transaction('hashlog', 'readonly');
+                const all = await new Promise(r => tx.objectStore('hashlog').getAll().onsuccess = e => r(e.target.result));
+                return all.filter(l => l.cId === cId);
+            }
+        }
+        
+        function notifyNGOs(complaint) {
+            console.log(`🔔 Notifying NGOs near ${complaint.lat},${complaint.lng} about complaint ${complaint.id}`);
+            setTimeout(() => { autoAssignNGO(complaint.id); }, 2000);
+        }
+        
+        function autoAssignNGO(complaintId) {
+            const tx = db.transaction('complaints', 'readwrite');
+            const req = tx.objectStore('complaints').get(complaintId);
+            req.onsuccess = async () => {
+                const c = req.result;
+                if(!c || c.verification?.ngoStatus !== 'pending') return;
+                c.verification.ngoId = 'NGO-ENV-001';
+                c.verification.ngoName = 'Green Earth Volunteers';
+                c.history.push({d: new Date().toLocaleString(), a: `Assigned to NGO: ${c.verification.ngoName}`});
+                tx.objectStore('complaints').put(c);
+                await HashChain.add(complaintId, 'NGO_ASSIGNED', {ngoId: c.verification.ngoId});
+                setTimeout(() => simulateNGOReview(complaintId), 3000);
+            };
+        }
+        
+        function simulateNGOReview(complaintId) {
+            const tx = db.transaction('complaints', 'readwrite');
+            const req = tx.objectStore('complaints').get(complaintId);
+            req.onsuccess = async () => {
+                const c = req.result;
+                if(!c) return;
+                const isVerified = Math.random() > 0.1;
+                c.verification.ngoStatus = isVerified ? 'verified' : 'rejected';
+                c.verification.ngoNotes = isVerified ? 
+                    'Field verification done. Issue confirmed. Forwarding to municipality.' : 
+                    'Could not verify. Insufficient evidence or duplicate report.';
+                c.verification.ngoReviewedAt = new Date().toISOString();
+                if(isVerified) {
+                    c.status = 'Municipal_Review';
+                    c.history.push({d: new Date().toLocaleString(), a: `✅ Verified by ${c.verification.ngoName}. Forwarded to municipal authority.`});
+                    notifyMunicipality(c);
+                } else {
+                    c.status = 'NGO_Rejected';
+                    c.history.push({d: new Date().toLocaleString(), a: `❌ Rejected by NGO: ${c.verification.ngoNotes}`});
+                    notifyUser(c.ownerEmail, 'verification_rejected', c);
+                }
+                tx.objectStore('complaints').put(c);
+                await HashChain.add(complaintId, 'NGO_VERDICT', {status: c.verification.ngoStatus, notes: c.verification.ngoNotes});
+            };
+        }
+        
+        function notifyMunicipality(complaint) {
+            console.log(`🏛️ Forwarding verified complaint ${complaint.id} to municipal department for category: ${complaint.cat}`);
+        }
+        
+        function notifyUser(email, type, complaint) {
+            console.log(`📧 Notifying user ${email}: ${type}`, complaint);
+            toast(`Update: Your complaint ${complaint.id} status changed`);
+        }
+        
+        async function checkAndEscalateComplaints() {
+            if(!db) return;
+            const tx = db.transaction('complaints', 'readwrite');
+            const allReq = tx.objectStore('complaints').getAll();
+            allReq.onsuccess = async () => {
+                const complaints = allReq.result;
+                const now = Date.now();
+                for(const c of complaints) {
+                    if(c.status !== 'Municipal_Review' || c.verification?.municipalStatus === 'completed') continue;
+                    const lastUpdate = new Date(c.verification.municipalUpdatedAt || c.ts).getTime();
+                    const hoursStale = (now - lastUpdate) / (1000 * 60 * 60);
+                    if(hoursStale >= ESCALATION_CONFIG.municipal_response_hours) {
+                        await escalateComplaint(c);
+                    }
+                }
+            };
+        }
+        
+        async function escalateComplaint(complaint) {
+            const currentLevel = complaint.escalationLevel || 0;
+            const nextLevel = ESCALATION_CONFIG.higher_authority_levels[currentLevel];
+            if(!nextLevel) {
+                complaint.status = 'Escalation_Max';
+                complaint.history.push({
+                    d: new Date().toLocaleString(), 
+                    a: `⚠️ Maximum escalation reached. Complaint flagged for manual review by oversight committee.`
+                });
+            } else {
+                complaint.escalationLevel = currentLevel + 1;
+                complaint.verification.municipalStatus = 'escalated';
+                complaint.verification.escalatedTo = nextLevel.title;
+                complaint.verification.escalatedAt = new Date().toISOString();
+                complaint.status = `Escalated_L${complaint.escalationLevel}`;
+                complaint.history.push({
+                    d: new Date().toLocaleString(),
+                    a: `⬆️ Escalated to ${nextLevel.title} (Level ${complaint.escalationLevel}) - No response within ${ESCALATION_CONFIG.municipal_response_hours}h`
+                });
+                console.log(`🚨 ESCALATION: Complaint ${complaint.id} sent to ${nextLevel.title} at ${nextLevel.email}`);
+                notifyUser(complaint.ownerEmail, 'escalated', complaint);
+            }
+            db.transaction('complaints', 'readwrite').objectStore('complaints').put(complaint);
+            await HashChain.add(complaint.id, 'ESCALATION', {
+                level: complaint.escalationLevel,
+                escalatedTo: complaint.verification.escalatedTo,
+                reason: 'municipal_timeout'
+            });
+            toast(getTranslation('escalationAlert') || `Complaint ${complaint.id} escalated to higher authority`);
+        }
+        
+        async function submitComplaint() {
+            const cat = document.getElementById('issueCat').value;
+            const desc = document.getElementById('descInput').value.trim();
+            if(!cat) { toast('Please select a category', 'error'); return; }
+            if(!desc) { toast('Please describe the issue', 'error'); return; }
+            if(!gps) { toast('Waiting for GPS...', 'error'); return; }
+            const id = 'NY-' + Math.random().toString(36).substr(2,6).toUpperCase();
+            const anon = document.getElementById('anonToggle').checked;
+            const img = document.getElementById('imgPreview').classList.contains('show') ? document.getElementById('imgPreview').src : null;
+            
+            const c = {
+                id, userId: anon ? 'anon' : currentUser.email, ownerEmail: currentUser.email, userName: anon ? 'Anonymous' : currentUser.name,
+                cat, desc, lat: gps.lat, lng: gps.lng, img, anon, 
+                status: 'NGO_Review',
+                verification: {
+                    ngoId: null, ngoName: null, ngoStatus: 'pending',
+                    ngoNotes: '', ngoReviewedAt: null,
+                    municipalStatus: 'not_assigned', municipalNotes: '', municipalUpdatedAt: null,
+                    escalatedTo: null, escalatedAt: null
+                },
+                escalationLevel: 0,
+                vYes: 0, vNo: 0, ts: new Date().toISOString(), voiceLang: currentVoiceLang,
+                history: [{d: new Date().toLocaleString(), a: `Registered in ${INDIAN_LANGUAGES[currentVoiceLang]?.name || 'English'}. Awaiting NGO verification.`}]
+            };
+            db.transaction('complaints', 'readwrite').objectStore('complaints').add(c);
+            await HashChain.add(id, 'CREATED', {cat, desc, lang: currentVoiceLang, workflow: 'ngo_first'});
+            notifyNGOs(c);
+            toast(`${getTranslation('complaintSubmitted') || 'Complaint submitted!'} ID: ${id}`); 
+            speak(`${getTranslation('complaintSubmitted')} ${id}`);
+            document.getElementById('descInput').value = ''; document.getElementById('issueCat').value = '';
+            document.getElementById('imgPreview').classList.remove('show'); document.getElementById('retakeBtn').style.display = 'none';
+            document.getElementById('trackId').value = id; trackComplaint(); nav('track');
+        }
+        
+        // ✅ LOW-LITERACY: Update Status Visuals
+        function updateStatusVisuals() {
+            const status = document.getElementById('trackStatus')?.textContent || '';
+            const visual = document.getElementById('statusVisual');
+            const icon = visual?.querySelector('.status-icon i');
+            const text = document.getElementById('statusText');
+            const subtext = document.getElementById('statusSubtext');
+            
+            if(!visual) return;
+            
+            visual.className = 'status-visual';
+            if(status.includes('Submitted') || status.includes('NGO')) {
+                visual.classList.add('submitted');
+                icon.className = 'fas fa-hourglass-half';
+                text.textContent = getTranslation('statusSubmitted');
+                subtext.textContent = 'Your complaint is being reviewed';
+            } else if(status.includes('Progress') || status.includes('Municipal')) {
+                visual.classList.add('progress');
+                icon.className = 'fas fa-cog fa-spin';
+                text.textContent = getTranslation('statusInProgress');
+                subtext.textContent = 'Municipality is working on it';
+            } else if(status.includes('Resolved')) {
+                visual.classList.add('resolved');
+                icon.className = 'fas fa-check';
+                text.textContent = getTranslation('statusResolved');
+                subtext.textContent = 'Issue has been fixed!';
+            } else if(status.includes('Escalated')) {
+                visual.classList.add('escalated');
+                icon.className = 'fas fa-arrow-up';
+                text.textContent = getTranslation('statusEscalated');
+                subtext.textContent = 'Escalated to higher authority';
+            }
+        }
+        
+        async function trackComplaint() {
+            const id = document.getElementById('trackId').value.trim();
+            if(!id) { toast('Enter Complaint ID', 'error'); return; }
+            const tx = db.transaction('complaints', 'readonly');
+            const req = tx.objectStore('complaints').get(id);
+            req.onsuccess = async () => {
+                const c = req.result;
+                if(!c) { toast('Complaint not found', 'error'); document.getElementById('trackResult').style.display='none'; return; }
+                document.getElementById('trackResult').style.display = 'block';
+                document.getElementById('trackIdDisplay').textContent = c.id;
+                document.getElementById('trackDesc').textContent = c.desc;
+                const st = document.getElementById('trackStatus');
+                st.textContent = c.status.replace('_', ' ');
+                st.className = `status-badge status-${c.status.toLowerCase().replace('_', '-')}`;
+                document.getElementById('trackImg').innerHTML = c.img ? `<img src="${c.img}" style="max-width:100%; border-radius:12px; margin-bottom:14px;">` : '';
+                document.getElementById('trackTimeline').innerHTML = c.history.map(h => `<div class="timeline-item"><div class="t-date">${h.d}</div><div class="t-text">${h.a}</div></div>`).join('');
+                const logs = await HashChain.get(id);
+                document.getElementById('trackHash').innerHTML = logs.map(l => `<div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed var(--gray-300);"><div style="font-weight:700; font-size:0.85rem;">${l.action}</div><div class="hash-box">${l.hash}</div></div>`).join('');
+                
+                // ✅ Update visual status
+                updateStatusVisuals();
+                
+                // Show NGO verification panel
+                const ngoPanel = document.getElementById('ngoVerificationPanel');
+                if(c.verification && c.verification.ngoStatus !== 'pending') {
+                    ngoPanel.style.display = 'block';
+                    document.getElementById('ngoName').textContent = c.verification.ngoName || 'Pending assignment';
+                    document.getElementById('ngoReviewedAt').textContent = c.verification.ngoReviewedAt ? 
+                        new Date(c.verification.ngoReviewedAt).toLocaleString() : '-';
+                    document.getElementById('ngoNotes').textContent = c.verification.ngoNotes || '';
+                    const badge = document.getElementById('ngoStatusBadge');
+                    badge.textContent = c.verification.ngoStatus === 'verified' ? '✅ Verified' : 
+                                       c.verification.ngoStatus === 'rejected' ? '❌ Rejected' : '⏳ Reviewing';
+                    badge.className = `status-badge status-ngo-${c.verification.ngoStatus}`;
+                } else {
+                    ngoPanel.style.display = 'none';
+                }
+                
+                // Show escalation panel
+                const escPanel = document.getElementById('escalationPanel');
+                if(c.escalationLevel && c.escalationLevel > 0) {
+                    escPanel.style.display = 'block';
+                    document.getElementById('escalationLevel').textContent = `Level ${c.escalationLevel} of ${ESCALATION_CONFIG.higher_authority_levels.length}`;
+                    document.getElementById('escalatedTo').textContent = c.verification.escalatedTo || 'Processing';
+                    document.getElementById('escalatedAt').textContent = c.verification.escalatedAt ? 
+                        new Date(c.verification.escalatedAt).toLocaleString() : '-';
+                } else {
+                    escPanel.style.display = 'none';
+                }
+                
+                speak(`Complaint ${id} status: ${c.status}`);
+            };
+            req.onerror = () => toast('Error loading complaint', 'error');
+        }
+        
+        function loadMyComplaints() {
+            if(!currentUser) return;
+            const tx = db.transaction('complaints', 'readonly');
+            const req = tx.objectStore('complaints').getAll();
+            req.onsuccess = () => {
+                const list = req.result.filter(c => c.userId === currentUser.email || c.ownerEmail === currentUser.email);
+                const el = document.getElementById('myList');
+                if(!list.length) { el.innerHTML = '<div class="card"><div class="empty-state"><i class="fas fa-inbox"></i><p>No complaints yet</p></div></div>'; return; }
+                el.innerHTML = list.sort((a,b)=>new Date(b.ts)-new Date(a.ts)).map(c => `
+                    <div class="complaint-item" onclick="document.getElementById('trackId').value='${c.id}'; trackComplaint(); nav('track');">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong style="font-size: 1.1rem;">${c.id}</strong>
+                            <span class="status-badge status-${c.status.toLowerCase().replace('_', '-')}">${c.status.replace('_', ' ')}</span>
+                        </div>
+                        <p style="font-size:1rem; color:var(--gray-600); margin-bottom:10px;">${c.desc.substring(0,80)}...</p>
+                        <div style="font-size:0.9rem; color:var(--gray-400); display:flex; gap:14px; flex-wrap: wrap;">
+                            <span><i class="fas fa-tag"></i> ${getTranslation('cat'+c.cat.charAt(0).toUpperCase()+c.cat.slice(1)) || c.cat}</span>
+                            <span><i class="fas fa-language"></i> ${c.voiceLang ? INDIAN_LANGUAGES[c.voiceLang]?.flag : ''}</span>
+                            <span><i class="fas fa-calendar"></i> ${new Date(c.ts).toLocaleDateString()}</span>
+                        </div>
+                        ${c.verification?.ngoStatus ? `<div style="margin-top:10px;"><span class="status-badge status-ngo-${c.verification.ngoStatus}">NGO: ${c.verification.ngoStatus}</span></div>` : ''}
+                    </div>
+                `).join('');
+            };
+            req.onerror = () => toast('Error loading complaints', 'error');
+        }
+        
+        function loadHomeStats() {
+            const tx = db.transaction('complaints', 'readonly');
+            tx.objectStore('complaints').getAll().onsuccess = e => {
+                const c = e.target.result;
+                document.getElementById('homeTotal').textContent = c.length;
+                document.getElementById('homePending').textContent = c.filter(x=>x.status!=='Resolved' && !x.status.includes('Escalated')).length;
+                document.getElementById('homeResolved').textContent = c.filter(x=>x.status==='Resolved').length;
+            };
+        }
+        
+        function loadAdmin() {
+            if(currentUser?.role !== 'admin' && currentUser?.role !== 'ngo') { nav('home'); return; }
+            const tx = db.transaction('complaints', 'readonly');
+            tx.objectStore('complaints').getAll().onsuccess = async e => {
+                const c = e.target.result;
+                document.getElementById('statTotal').textContent = c.length;
+                document.getElementById('statPending').textContent = c.filter(x=>x.status==='Submitted' || x.status==='NGO_Review').length;
+                document.getElementById('statProgress').textContent = c.filter(x=>x.status==='In Progress' || x.status==='Municipal_Review').length;
+                document.getElementById('statResolved').textContent = c.filter(x=>x.status==='Resolved').length;
+                document.getElementById('adminList').innerHTML = c.sort((a,b)=>new Date(b.ts)-new Date(a.ts)).map(x => `
+                    <div class="complaint-item">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <div><strong style="font-size: 1.1rem;">${x.id}</strong><span style="font-size:0.8rem; background:var(--gray-100); padding:4px 10px; border-radius:8px; margin-left: 8px;">${x.anon?'Anonymous':x.userName}</span></div>
+                            <select onchange="updateStatus('${x.id}', this.value)" style="padding:8px 12px; border-radius:10px; border:2px solid var(--gray-300); font-size: 1rem; min-height: var(--touch-target);">
+                                <option ${x.status==='Submitted'?'selected':''}>Submitted</option>
+                                <option ${x.status==='NGO_Review'?'selected':''}>NGO Review</option>
+                                <option ${x.status==='Municipal_Review'?'selected':''}>Municipal Review</option>
+                                <option ${x.status==='Resolved'?'selected':''}>Resolved</option>
+                            </select>
+                        </div>
+                        <p style="font-size:1rem; color:var(--gray-600); margin-bottom:12px;">${x.desc}</p>
+                        <div style="font-size:0.9rem; color:var(--gray-400); display:flex; gap:14px; flex-wrap: wrap;">
+                            <span><i class="fas fa-tag"></i> ${x.cat}</span>
+                            <span><i class="fas fa-language"></i> ${x.voiceLang ? INDIAN_LANGUAGES[x.voiceLang]?.flag : ''}</span>
+                            <span><i class="fas fa-check"></i> ${x.vYes} yes</span>
+                            <span><i class="fas fa-times"></i> ${x.vNo} no</span>
+                            ${x.verification?.ngoName ? `<span><i class="fas fa-hand-holding-heart"></i> ${x.verification.ngoName}</span>` : ''}
+                        </div>
+                        ${x.verification?.ngoStatus ? `<div style="margin-top:10px;"><span class="status-badge status-ngo-${x.verification.ngoStatus}">NGO: ${x.verification.ngoStatus}</span> ${x.verification.ngoNotes ? `<small style="color:var(--gray-600); margin-left:10px;">${x.verification.ngoNotes}</small>` : ''}</div>` : ''}
+                    </div>
+                `).join('');
+            };
+        }
+        
+        function updateStatus(id, st) {
+            const tx = db.transaction('complaints', 'readwrite');
+            const req = tx.objectStore('complaints').get(id);
+            req.onsuccess = async () => {
+                const c = req.result; c.status = st;
+                c.history.push({d: new Date().toLocaleString(), a: `Status changed to ${st} by ${currentUser.role}`});
+                tx.objectStore('complaints').put(c);
+                await HashChain.add(id, 'STATUS_UPDATE', {st, admin: currentUser.email});
+                loadAdmin(); toast(getTranslation('statusUpdated') || `Status updated to ${st}`);
+            };
+            req.onerror = () => toast('Error updating status', 'error');
+        }
+        
+        function loadValidation() {
+            const tx = db.transaction('complaints', 'readonly');
+            tx.objectStore('complaints').getAll().onsuccess = e => {
+                const c = e.target.result.filter(x=>x.status==='Resolved');
+                const el = document.getElementById('validateList');
+                if(!c.length) { el.innerHTML = '<div class="card"><div class="empty-state"><i class="fas fa-check-circle"></i><p>No resolved issues to validate</p></div></div>'; return; }
+                el.innerHTML = c.map(x => {
+                    const tot = x.vYes + x.vNo; const pct = tot ? Math.round(x.vYes/tot*100) : 0;
+                    return `
+                        <div class="complaint-item">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <strong style="font-size: 1.1rem;">${x.id}</strong>
+                                <span class="status-badge status-resolved">Resolved</span>
+                            </div>
+                            <p style="font-size:1rem; color:var(--gray-600); margin-bottom:12px;">${x.desc}</p>
+                            ${x.img ? `<img src="${x.img}" style="max-width:160px; border-radius:10px; margin-bottom:14px;">` : ''}
+                            <div style="display:flex; gap:12px; margin-bottom:12px;">
+                                <button class="vote-btn vote-yes" onclick="vote('${x.id}','yes')"><i class="fas fa-check"></i> Fixed (${x.vYes})</button>
+                                <button class="vote-btn vote-no" onclick="vote('${x.id}','no')"><i class="fas fa-times"></i> Not Fixed (${x.vNo})</button>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                            <div style="text-align:center; font-size:0.9rem; color:var(--gray-600);">${pct}% community verified (Threshold: 75%)</div>
+                        </div>
+                    `;
+                }).join('');
+            };
+        }
+        
+        function vote(id, type) {
+            const tx = db.transaction('complaints', 'readwrite');
+            const req = tx.objectStore('complaints').get(id);
+            req.onsuccess = async () => {
+                const c = req.result; type==='yes' ? c.vYes++ : c.vNo++;
+                tx.objectStore('complaints').put(c);
+                await HashChain.add(id, 'VOTE', {type, voter: currentUser.email});
+                loadValidation(); toast(getTranslation('voteRecorded') || 'Vote recorded successfully'); speak(getTranslation('voteRecorded'));
+            };
+            req.onerror = () => toast('Error recording vote', 'error');
+        }
+        
+        async function logCallComplaint() {
+            const ref = document.getElementById('callRef').value.trim();
+            const summary = document.getElementById('callSummary').value.trim();
+            if(!ref || !summary) { toast('Enter reference & summary', 'error'); return; }
+            const btn = event.target.closest('.btn'); setLoading(btn, true); await new Promise(r => setTimeout(r, 600));
+            const id = 'CALL-' + Math.random().toString(36).substr(2,6).toUpperCase();
+            const c = {
+                id, userId: currentUser.email, ownerEmail: currentUser.email, userName: currentUser.name,
+                cat: 'Phone Call', desc: `[Call Ref: ${ref}] ${summary}`,
+                lat: gps?.lat || 0, lng: gps?.lng || 0, img: null, anon: false,
+                status: 'NGO_Review',
+                verification: {
+                    ngoId: null, ngoName: null, ngoStatus: 'pending',
+                    ngoNotes: '', ngoReviewedAt: null,
+                    municipalStatus: 'not_assigned', municipalNotes: '', municipalUpdatedAt: null
+                },
+                vYes: 0, vNo: 0, ts: new Date().toISOString(), voiceLang: 'call',
+                history: [{d: new Date().toLocaleString(), a: 'Registered via Authority Call. Awaiting NGO verification.'}]
+            };
+            db.transaction('complaints', 'readwrite').objectStore('complaints').add(c);
+            db.transaction('calls', 'readwrite').objectStore('calls').add({id, ref, summary, ts: new Date().toISOString(), userId: currentUser.email});
+            await HashChain.add(id, 'CALL_LOGGED', {ref, summary});
+            notifyNGOs(c);
+            toast('Call complaint logged successfully!'); speak('Complaint logged');
+            document.getElementById('callRef').value = ''; document.getElementById('callSummary').value = '';
+            document.getElementById('trackId').value = id; trackComplaint(); nav('track'); setLoading(btn, false);
+        }
+        
+        window.onload = async () => {
+            await initDB(); initSpeech(); initGPS();
+            if('speechSynthesis' in window) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(); }
+            const langSelect = document.getElementById('voiceLang');
+            if(langSelect) {
+                langSelect.replaceWith(langSelect.cloneNode(true));
+                const newSelect = document.getElementById('voiceLang');
+                newSelect.addEventListener('change', changeVoiceLanguage);
+                newSelect.addEventListener('touchend', function(e) { e.stopPropagation(); setTimeout(() => changeVoiceLanguage(), 50); });
+            }
+            const tx = db.transaction('users', 'readonly');
+            const countReq = tx.objectStore('users').count();
+            countReq.onsuccess = () => {
+                if (countReq.result === 0) {
+                    const writeTx = db.transaction('users', 'readwrite');
+                    writeTx.objectStore('users').add({ 
+                        email: 'demo@nyayasetu.app', 
+                        name: 'Demo User', 
+                        phone: '9999999999', 
+                        role: 'citizen', 
+                        password: safeEncode('123456'), 
+                        provider: 'auto', 
+                        createdAt: new Date().toISOString(),
+                        preferences: { language: 'en', autoDetectLang: true }
+                    });
+                    document.getElementById('loginEmail').value = 'demo@nyayasetu.app';
+                    document.getElementById('loginPassword').value = '123456';
+                    toast('Demo account created! Click Login.', 'success');
+                }
+            };
+            try {
+                const sessTx = db.transaction('sessions', 'readonly');
+                const sessReq = sessTx.objectStore('sessions').get('active');
+                sessReq.onsuccess = async () => {
+                    const s = sessReq.result;
+                    if(s) {
+                        try {
+                            const uTx = db.transaction('users', 'readonly');
+                            const uReq = uTx.objectStore('users').get(s.userId);
+                            uReq.onsuccess = () => { if(uReq.result) createSession(uReq.result); };
+                            uReq.onerror = () => showScreen('loginScreen');
+                        } catch(e) { showScreen('loginScreen'); }
+                    }
+                };
+                sessReq.onerror = () => showScreen('loginScreen');
+            } catch(e) { showScreen('loginScreen'); }
+            
+            // Start periodic escalation checker
+            setInterval(checkAndEscalateComplaints, 5 * 60 * 1000);
+            
+            // ✅ LOW-LITERACY: Load saved accessibility preferences
+            if(localStorage.getItem('nyayaSetu_contrast') === 'true') {
+                document.body.classList.add('high-contrast');
+                document.getElementById('contrastBtn').classList.add('active');
+            }
+            if(localStorage.getItem('nyayaSetu_simple') === 'true') {
+                document.body.classList.add('simplified');
+                document.getElementById('simpleBtn').classList.add('active');
+            }
+        };
+    </script>
+</body>
+</html>
